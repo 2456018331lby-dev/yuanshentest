@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>原神角色人格测试</title>
+    <meta name="description" content="发现你最像哪位提瓦特大陆的伙伴">
+    <!-- 字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- ========== 首页 ========== -->
+        <section id="landing-page" class="page active">
+            <div class="landing-content">
+                <!-- 顶部装饰 -->
+                <div class="landing-header-decoration">
+                    <span class="deco-line"></span>
+                    <span class="deco-icon">&#10022;</span>
+                    <span class="deco-line"></span>
+                </div>
+
+                <h1 class="title">原神角色人格测试</h1>
+                <p class="subtitle">发现你最像哪位提瓦特大陆的伙伴</p>
+
+                <!-- 中央徽章 -->
+                <div class="landing-emblem">
+                    <span class="emblem-inner">&#10022;</span>
+                </div>
+
+                <!-- 8维度预览 -->
+                <div class="dimension-preview">
+                    <div class="dim-preview-item"><span class="dim-dot" style="background: var(--el-pyro)"></span>外向-内向</div>
+                    <div class="dim-preview-item"><span class="dim-dot" style="background: var(--el-hydro)"></span>实感-直觉</div>
+                    <div class="dim-preview-item"><span class="dim-dot" style="background: var(--el-anemo)"></span>思考-情感</div>
+                    <div class="dim-preview-item"><span class="dim-dot" style="background: var(--el-geo)"></span>判断-知觉</div>
+                    <div class="dim-preview-item"><span class="dim-dot" style="background: var(--el-electro)"></span>冒险-谨慎</div>
+                    <div class="dim-preview-item"><span class="dim-dot" style="background: var(--el-cryo)"></span>光明-黑暗</div>
+                    <div class="dim-preview-item"><span class="dim-dot" style="background: var(--el-dendro)"></span>规则-混沌</div>
+                    <div class="dim-preview-item"><span class="dim-dot" style="background: #e0a0ff"></span>热情-冷静</div>
+                </div>
+
+                <button id="start-btn" class="btn-primary btn-pulse">开始测试</button>
+
+                <div class="landing-footer">
+                    <span>共 64 道题目</span>
+                    <span class="dot"></span>
+                    <span>8 大维度</span>
+                    <span class="dot"></span>
+                    <span>32 位角色</span>
+                    <span class="dot"></span>
+                    <span>约需 10-15 分钟</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 测试页 ========== -->
+        <section id="quiz-page" class="page">
+            <div class="quiz-header">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-text">
+                    <span>提瓦特之旅</span>
+                    <span class="question-counter" id="progress-text">1 / 64</span>
+                </div>
+            </div>
+
+            <div class="quiz-content ornate-border">
+                <!-- 四角装饰 -->
+                <span class="corner corner-tl"></span>
+                <span class="corner corner-tr"></span>
+                <span class="corner corner-bl"></span>
+                <span class="corner corner-br"></span>
+
+                <div class="question-number" id="question-number">Question 01</div>
+                <h2 id="question-text" class="question"></h2>
+                <div id="options-container" class="options"></div>
+            </div>
+        </section>
+
+        <!-- ========== 结果页 ========== -->
+        <section id="result-page" class="page">
+            <div class="result-content">
+                <div class="result-header">
+                    <h2 class="result-title">&#10022; 你的测试结果 &#10022;</h2>
+                    <p class="result-subtitle">命运的指引，揭示了真实的你</p>
+                </div>
+
+                <div class="character-card ornate-border">
+                    <!-- 四角装饰 -->
+                    <span class="corner corner-tl"></span>
+                    <span class="corner corner-tr"></span>
+                    <span class="corner corner-bl"></span>
+                    <span class="corner corner-br"></span>
+
+                    <div class="character-portrait">
+                        <div class="portrait-ring"></div>
+                        <div class="character-image" id="character-image"></div>
+                        <div class="element-badge" id="element-badge"></div>
+                    </div>
+
+                    <h3 id="character-name" class="character-name"></h3>
+                    <p id="character-title" class="character-title"></p>
+                    <div class="personality-type" id="personality-type"></div>
+                    <div class="match-score" id="match-score"></div>
+                    <p id="character-description" class="character-description"></p>
+                    <div class="traits" id="traits"></div>
+                </div>
+
+                <!-- 雷达图 -->
+                <div class="result-section ornate-border">
+                    <span class="corner corner-tl"></span>
+                    <span class="corner corner-tr"></span>
+                    <span class="corner corner-bl"></span>
+                    <span class="corner corner-br"></span>
+                    <h3 class="section-title">人格雷达图</h3>
+                    <canvas id="radar-canvas" class="radar-canvas"></canvas>
+                </div>
+
+                <!-- 维度分析 -->
+                <div class="result-section ornate-border">
+                    <span class="corner corner-tl"></span>
+                    <span class="corner corner-tr"></span>
+                    <span class="corner corner-bl"></span>
+                    <span class="corner corner-br"></span>
+                    <h3 class="section-title">维度分析</h3>
+                    <div id="dimension-bars" class="dimension-bars"></div>
+                </div>
+
+                <!-- 名言 -->
+                <div class="result-section ornate-border">
+                    <span class="corner corner-tl"></span>
+                    <span class="corner corner-tr"></span>
+                    <span class="corner corner-bl"></span>
+                    <span class="corner corner-br"></span>
+                    <div id="quote-block" class="quote-block"></div>
+                </div>
+
+                <!-- 游戏风格 -->
+                <div class="result-section ornate-border">
+                    <span class="corner corner-tl"></span>
+                    <span class="corner corner-tr"></span>
+                    <span class="corner corner-bl"></span>
+                    <span class="corner corner-br"></span>
+                    <div id="playstyle-block" class="playstyle-block"></div>
+                </div>
+
+                <!-- 人际关系 -->
+                <div class="result-section ornate-border">
+                    <span class="corner corner-tl"></span>
+                    <span class="corner corner-tr"></span>
+                    <span class="corner corner-bl"></span>
+                    <span class="corner corner-br"></span>
+                    <h3 class="section-title">人际关系</h3>
+                    <div id="teammates-block" class="teammates-block"></div>
+                    <div id="avoid-block" class="avoid-block"></div>
+                </div>
+
+                <div class="result-actions">
+                    <button id="restart-btn" class="btn-primary">重新测试</button>
+                    <button id="share-btn" class="btn-secondary">分享结果</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast 提示 -->
+    <div id="toast" class="toast"></div>
+
+    <script src="js/data.js"></script>
+    <script src="js/quiz.js"></script>
+</body>
+</html>
