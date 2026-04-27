@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0c0c14"/>
+    </radialGradient>
+    <radialGradient id="elementGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4fc3f7" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#4fc3f7" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="url(#bgGrad)" stroke="#4fc3f7" stroke-width="3"/>
+
+  <!-- Element glow -->
+  <circle cx="100" cy="100" r="80" fill="url(#elementGrad)"/>
+
+  <!-- Decorative ring -->
+  <circle cx="100" cy="100" r="70" fill="none" stroke="#4fc3f7" stroke-width="1" stroke-opacity="0.5"/>
+  <circle cx="100" cy="100" r="60" fill="none" stroke="#4fc3f7" stroke-width="1" stroke-opacity="0.3"/>
+
+  <!-- Character initial -->
+  <text x="100" y="115" font-family="Noto Sans SC, Microsoft YaHei, sans-serif" font-size="72"
+        font-weight="bold" fill="#4fc3f7" text-anchor="middle">莫</text>
+
+  <!-- Element symbol at bottom -->
+  <circle cx="100" cy="165" r="15" fill="#0c0c14" stroke="#4fc3f7" stroke-width="2"/>
+  <text x="100" y="171" font-family="sans-serif" font-size="14" fill="#4fc3f7" text-anchor="middle">水</text>
+</svg>
