@@ -742,6 +742,7 @@ const characters = {
     title: "蒲公英骑士",
     element: "风",
     emoji: "⚔️",
+    image: "images/characters/jean.png",
     description: "西风骑士团代理团长，琴以高度的责任感和无私的奉献精神守护着蒙德。她严于律己，总是将他人置于自己之上。",
     traits: ["责任感", "自律", "正义", "温柔", "疲惫", "领导"],
     radar: [55, 70, 55, 90, 40, 85, 90, 50],
