@@ -222,7 +222,11 @@ class PersonalityQuiz {
 
         if (character) {
             // 设置角色内容
-            this.characterImage.innerHTML = `<span class="emoji-fallback">${character.emoji}</span>`;
+            if (character.image) {
+                this.characterImage.innerHTML = `<img src="${character.image}" alt="${character.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='<span class=\\'emoji-fallback\\'>${character.emoji}</span>'">`;
+            } else {
+                this.characterImage.innerHTML = `<span class="emoji-fallback">${character.emoji}</span>`;
+            }
             this.characterImage.style.background = `linear-gradient(135deg, ${elementColors[character.element]}, ${this.adjustColor(elementColors[character.element], 40)})`;
 
             this.characterName.textContent = character.name;

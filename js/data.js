@@ -728,6 +728,7 @@ const characters = {
     title: "白垩之子",
     element: "岩",
     emoji: "🎨",
+    image: "images/characters/albedo.png",
     description: "西风骑士团首席炼金术士，「白垩之子」阿贝多。他以冷静理性的态度研究世界的奥秘，对生命的本质充满好奇却始终保持克制。",
     traits: ["理性", "冷静", "博学", "克制", "好奇", "孤独"],
     radar: [45, 35, 85, 75, 30, 60, 70, 15],
