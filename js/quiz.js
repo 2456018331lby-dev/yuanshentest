@@ -193,11 +193,11 @@ class PersonalityQuiz {
         if (this.soundEnabled) {
             onIcon.style.display = '';
             offIcon.style.display = 'none';
-            this.showToast('音效已开启');
+            this.showToast(t('soundOn'));
         } else {
             onIcon.style.display = 'none';
             offIcon.style.display = '';
-            this.showToast('音效已关闭');
+            this.showToast(t('soundOff'));
         }
     }
 
@@ -286,7 +286,7 @@ class PersonalityQuiz {
         this.clearSavedProgress();
         this.continueBtn.style.display = 'none';
         this.clearProgressWrap.style.display = 'none';
-        this.showToast('进度已清除');
+        this.showToast(t('progressCleared'));
     }
 
     // ---- Exit Confirmation ----
@@ -426,7 +426,7 @@ class PersonalityQuiz {
                 }, 300);
             }, 100);
         } else {
-            this.showToast('无法恢复进度，将重新开始');
+            this.showToast(t('resumeFailed'));
             this.startQuiz();
         }
     }
@@ -676,7 +676,7 @@ class PersonalityQuiz {
             this.personalityType.innerHTML = `
                 <span>${typeLabels}</span>
                 <span class="divider"></span>
-                <span>${character.element}元素</span>
+                <span>${character.element}${t('elementSuffix')}</span>
             `;
 
             this.characterDescription.textContent = character.description;
@@ -684,7 +684,7 @@ class PersonalityQuiz {
 
             // 匹配度
             if (this.matchScore) {
-                this.matchScore.textContent = `匹配度 ${matchPercent}%`;
+                this.matchScore.textContent = `${t('matchScore')} ${matchPercent}%`;
             }
 
             // 特质标签
@@ -707,8 +707,8 @@ class PersonalityQuiz {
                     card.innerHTML = `
                         <span class="similar-card-emoji">${match.character.emoji}</span>
                         <div class="similar-card-name">${match.character.name}</div>
-                        <div class="similar-card-element">${elementIcons[match.character.element] || ''} ${match.character.element}元素 · ${match.character.title}</div>
-                        <div class="similar-card-match">匹配度 <span>${match.matchPercent}%</span></div>
+                        <div class="similar-card-element">${elementIcons[match.character.element] || ''} ${match.character.element}${t('elementSuffix')} · ${match.character.title}</div>
+                        <div class="similar-card-match">${t('matchScore')} <span>${match.matchPercent}%</span></div>
                     `;
                     this.similarCards.appendChild(card);
                 }
@@ -736,7 +736,7 @@ class PersonalityQuiz {
             // 游戏风格
             if (this.playstyleBlock) {
                 this.playstyleBlock.innerHTML = `
-                    <h4 class="section-subtitle">游戏风格</h4>
+                    <h4 class="section-subtitle">${t('playstyleTitle')}</h4>
                     <p>${character.playstyle}</p>
                 `;
             }
@@ -748,7 +748,7 @@ class PersonalityQuiz {
                     return mate ? `<span class="relation-tag mate">${mate.emoji} ${name}</span>` : '';
                 }).join('');
                 this.teammatesBlock.innerHTML = `
-                    <h4 class="section-subtitle">默契搭档</h4>
+                    <h4 class="section-subtitle">${t('perfectMatch')}</h4>
                     <div class="relation-tags">${matesHtml}</div>
                 `;
             }
@@ -760,7 +760,7 @@ class PersonalityQuiz {
                     return av ? `<span class="relation-tag avoid">${av.emoji} ${name}</span>` : '';
                 }).join('');
                 this.avoidBlock.innerHTML = `
-                    <h4 class="section-subtitle">气场相冲</h4>
+                    <h4 class="section-subtitle">${t('conflictMatch')}</h4>
                     <div class="relation-tags">${avoidHtml}</div>
                 `;
             }
@@ -806,7 +806,7 @@ class PersonalityQuiz {
         const cy = h / 2;
         const radius = Math.min(w, h) / 2 - 40;
         const dims = ['EI', 'SN', 'TF', 'JP', 'AC', 'LD', 'RC', 'HM'];
-        const dimLabels = ['外向', '实感', '思考', '判断', '冒险', '光明', '规则', '热情'];
+        const dimLabels = tArr('radarLabels');
 
         ctx.clearRect(0, 0, w, h);
 
@@ -901,14 +901,14 @@ class PersonalityQuiz {
     renderDimensionBars(userRadar) {
         const dims = ['EI', 'SN', 'TF', 'JP', 'AC', 'LD', 'RC', 'HM'];
         const labels = {
-            EI: ['外向', '内向'],
-            SN: ['实感', '直觉'],
-            TF: ['思考', '情感'],
-            JP: ['判断', '知觉'],
-            AC: ['冒险', '谨慎'],
-            LD: ['光明', '黑暗'],
-            RC: ['规则', '混沌'],
-            HM: ['热情', '冷静']
+            EI: tArr('bar_EI'),
+            SN: tArr('bar_SN'),
+            TF: tArr('bar_TF'),
+            JP: tArr('bar_JP'),
+            AC: tArr('bar_AC'),
+            LD: tArr('bar_LD'),
+            RC: tArr('bar_RC'),
+            HM: tArr('bar_HM')
         };
 
         this.dimensionBars.innerHTML = '';
@@ -997,11 +997,15 @@ class PersonalityQuiz {
     shareResult() {
         const { character, matchPercent } = this.findBestMatch();
         const typeLabels = this.getDimensionLabels();
-        const shareText = `我在原神角色人格测试中匹配到了「${character.name}」！匹配度${matchPercent}%\n${character.title}\n人格类型：${typeLabels}\n\n来测测你最像哪位原神角色吧！`;
+        const shareText = t('shareText')
+            .replace('{name}', character.name)
+            .replace('{score}', matchPercent)
+            .replace('{title}', character.title)
+            .replace('{type}', typeLabels);
 
         if (navigator.share) {
             navigator.share({
-                title: '原神角色人格测试',
+                title: t('shareTitle'),
                 text: shareText,
                 url: window.location.href
             }).catch(err => {
@@ -1016,9 +1020,9 @@ class PersonalityQuiz {
 
     copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(() => {
-            this.showToast('结果已复制到剪贴板！');
+            this.showToast(t('resultCopied'));
         }).catch(() => {
-            this.showToast('复制失败，请手动复制');
+            this.showToast(t('copyFailed'));
         });
     }
 
@@ -1065,12 +1069,12 @@ class PersonalityQuiz {
         ctx.fillStyle = '#d4a843';
         ctx.font = '600 36px "Noto Serif SC", serif';
         ctx.textAlign = 'center';
-        ctx.fillText('原神角色人格测试', W / 2, 90);
+        ctx.fillText(t('shareTitle'), W / 2, 90);
 
         // Subtitle
         ctx.fillStyle = '#8a8478';
         ctx.font = '18px "Noto Sans SC", sans-serif';
-        ctx.fillText('发现你最像哪位提瓦特大陆的伙伴', W / 2, 130);
+        ctx.fillText(t('pageSubtitle'), W / 2, 130);
 
         // Decorative line
         ctx.strokeStyle = 'rgba(212, 168, 67, 0.3)';
@@ -1283,5 +1287,6 @@ class PersonalityQuiz {
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
+    applyUITranslations();
     new PersonalityQuiz();
 });
