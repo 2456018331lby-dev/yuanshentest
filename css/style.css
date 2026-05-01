@@ -45,6 +45,7 @@ body {
     overflow-x: hidden;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    transition: background 0.4s ease, color 0.4s ease;
 }
 
 body::before {
@@ -810,7 +811,7 @@ body::after {
 .section-subtitle { font-size: 0.95rem; color: var(--gold-primary); margin-bottom: 12px; font-weight: 600; text-align: center; }
 
 /* 雷达图 */
-.radar-canvas { width: 100%; max-width: 400px; height: 320px; margin: 0 auto; display: block; }
+.radar-canvas { width: 100%; max-width: 400px; height: 360px; margin: 0 auto; display: block; }
 
 /* 维度条 */
 .dimension-bars { max-width: 520px; margin: 0 auto; }
@@ -1023,7 +1024,7 @@ body::after {
     .character-portrait { width: 120px; height: 120px; }
     .character-image { font-size: 3rem; }
     .corner { width: 10px; height: 10px; }
-    .radar-canvas { height: 260px; max-width: 300px; }
+    .radar-canvas { height: 300px; max-width: 300px; }
     .landing-footer { font-size: 0.75rem; gap: 8px; }
     .personality-type { font-size: 0.85rem; padding: 6px 16px; }
     .dim-label { font-size: 0.7rem; width: 32px; }
@@ -1096,4 +1097,262 @@ body::after {
 .lang-toggle:hover {
     background: rgba(212,168,67,0.15);
     border-color: var(--gold-primary);
+}
+
+/* ---- Theme Toggle ---- */
+.theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 64px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(212,168,67,0.3);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 10;
+}
+.theme-toggle:hover {
+    background: rgba(212,168,67,0.15);
+    border-color: var(--gold-primary);
+}
+
+/* ---- Light Mode ---- */
+body.light-mode {
+    --bg-primary: #f8f6f0;
+    --bg-secondary: #eee9df;
+    --bg-card: #ffffff;
+    --bg-elevated: #f0ebe1;
+    --text-primary: #2c2416;
+    --text-secondary: #6b5e4a;
+    --text-muted: #9b8e7a;
+    --border-gold: rgba(180, 140, 40, 0.4);
+    --border-subtle: rgba(180, 140, 40, 0.15);
+    --gold-dim: rgba(212, 168, 67, 0.12);
+    --gold-glow: rgba(212, 168, 67, 0.2);
+    --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.08);
+    --shadow-gold: 0 0 40px rgba(212, 168, 67, 0.1);
+    --glow-gold: 0 0 20px rgba(212, 168, 67, 0.15);
+}
+
+body.light-mode::before {
+    background-image:
+        radial-gradient(ellipse 80% 50% at 20% 40%, rgba(212, 168, 67, 0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 70%, rgba(212, 168, 67, 0.03) 0%, transparent 50%);
+}
+
+body.light-mode .option {
+    background: rgba(0, 0, 0, 0.02);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .option:hover {
+    border-color: var(--border-gold);
+    background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-mode .dim-pill {
+    color: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .btn-back {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .sound-toggle {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .progress-bar {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .dim-bar-track {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .dim-bar-center {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .trait-tag {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .trait-tag:hover {
+    background: var(--gold-dim);
+    border-color: var(--border-gold);
+}
+
+body.light-mode .btn-modal-leave {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+body.light-mode .btn-modal-leave:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+body.light-mode .similar-card {
+    background: var(--bg-secondary);
+    border-color: rgba(0, 0, 0, 0.06);
+}
+
+body.light-mode .modal-box {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+body.light-mode .theme-toggle,
+body.light-mode .lang-toggle {
+    background: rgba(0,0,0,0.05);
+    border-color: rgba(180,140,40,0.3);
+}
+
+body.light-mode .toast {
+    background: var(--bg-elevated);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* ---- Quiz Timer ---- */
+.quiz-timer {
+    font-size: 0.85rem;
+    color: var(--gold-primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+}
+
+/* ---- Progress Dots ---- */
+.progress-dots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 3px;
+    margin-top: 12px;
+    padding: 0 4px;
+    align-items: center;
+}
+
+.progress-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    cursor: default;
+    flex-shrink: 0;
+}
+
+.progress-dot.answered {
+    background: rgba(212, 168, 67, 0.5);
+    cursor: pointer;
+}
+
+.progress-dot.answered:hover {
+    background: var(--gold-primary);
+    transform: scale(1.5);
+}
+
+.progress-dot.current {
+    background: var(--gold-primary);
+    box-shadow: 0 0 6px var(--gold-glow);
+    animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.4); opacity: 0.7; }
+}
+
+.progress-dot-separator {
+    width: 2px;
+    height: 6px;
+    background: transparent;
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .progress-dot {
+        width: 4px;
+        height: 4px;
+    }
+    .progress-dot-separator {
+        height: 4px;
+    }
+}
+
+/* ---- Confetti ---- */
+.confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 300;
+    overflow: hidden;
+}
+
+.confetti-piece {
+    position: absolute;
+    top: -20px;
+    width: 8px;
+    height: 14px;
+    border-radius: 2px;
+    animation: confettiFall 3s ease-out forwards;
+    opacity: 0.85;
+}
+
+@keyframes confettiFall {
+    0% {
+        transform: translateY(0) rotate(0deg) scale(1);
+        opacity: 0.85;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg) scale(0.5);
+        opacity: 0;
+    }
+}
+
+/* ---- Result Time ---- */
+.result-time {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-top: 8px;
+    letter-spacing: 0.05em;
+}
+
+/* ---- Responsive: wider pills ---- */
+@media (max-width: 640px) {
+    .dim-pill {
+        min-width: 50px;
+        height: 26px;
+        font-size: 0.6rem;
+        padding: 0 6px;
+        white-space: nowrap;
+    }
+    .dimension-pills {
+        gap: 4px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .quiz-timer {
+        font-size: 0.8rem;
+    }
+    .theme-toggle {
+        right: 52px;
+    }
+}
+
+@media (min-width: 641px) {
+    .dim-pill {
+        min-width: 70px;
+        font-size: 0.7rem;
+    }
 }

@@ -59,6 +59,7 @@
                     <span class="deco-icon">&#10022;</span>
                     <span class="deco-line"></span>
                     <button id="lang-toggle" class="lang-toggle" title="切换语言 / Switch Language" onclick="toggleLang()">🌐</button>
+                    <button id="theme-toggle" class="theme-toggle" title="切换主题 / Toggle Theme">🌙</button>
                 </div>
 
                 <h1 class="title">原神角色人格测试</h1>
@@ -113,6 +114,7 @@
                         <span class="sound-icon-off" style="display:none;">🔇</span>
                     </button>
                     <div class="quiz-nav-hint">按数字键 1-4 选择 · ← 返回 · → 下一题</div>
+                    <div class="quiz-timer" id="quiz-timer">⏱ 00:00</div>
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill"></div>
@@ -123,15 +125,17 @@
                 </div>
                 <!-- 维度进度指示器 -->
                 <div class="dimension-pills" id="dimension-pills">
-                    <span class="dim-pill" data-dim="EI" style="--pill-color: var(--el-pyro)">EI</span>
-                    <span class="dim-pill" data-dim="SN" style="--pill-color: var(--el-hydro)">SN</span>
-                    <span class="dim-pill" data-dim="TF" style="--pill-color: var(--el-anemo)">TF</span>
-                    <span class="dim-pill" data-dim="JP" style="--pill-color: var(--el-geo)">JP</span>
-                    <span class="dim-pill" data-dim="AC" style="--pill-color: var(--el-electro)">AC</span>
-                    <span class="dim-pill" data-dim="LD" style="--pill-color: var(--el-cryo)">LD</span>
-                    <span class="dim-pill" data-dim="RC" style="--pill-color: var(--el-dendro)">RC</span>
-                    <span class="dim-pill" data-dim="HM" style="--pill-color: #e0a0ff">HM</span>
+                    <span class="dim-pill" data-dim="EI" style="--pill-color: var(--el-pyro)">外向 · 内向</span>
+                    <span class="dim-pill" data-dim="SN" style="--pill-color: var(--el-hydro)">实感 · 直觉</span>
+                    <span class="dim-pill" data-dim="TF" style="--pill-color: var(--el-anemo)">思考 · 情感</span>
+                    <span class="dim-pill" data-dim="JP" style="--pill-color: var(--el-geo)">判断 · 知觉</span>
+                    <span class="dim-pill" data-dim="AC" style="--pill-color: var(--el-electro)">冒险 · 谨慎</span>
+                    <span class="dim-pill" data-dim="LD" style="--pill-color: var(--el-cryo)">光明 · 黑暗</span>
+                    <span class="dim-pill" data-dim="RC" style="--pill-color: var(--el-dendro)">规则 · 混沌</span>
+                    <span class="dim-pill" data-dim="HM" style="--pill-color: #e0a0ff">热情 · 冷静</span>
                 </div>
+                <!-- 问题进度点 -->
+                <div class="progress-dots" id="progress-dots"></div>
             </div>
 
             <!-- Loading Skeleton -->
@@ -168,6 +172,7 @@
                 <div class="result-header">
                     <h2 class="result-title">&#10022; 你的测试结果 &#10022;</h2>
                     <p class="result-subtitle">命运的指引，揭示了真实的你</p>
+                    <p class="result-time" id="result-time"></p>
                 </div>
 
                 <div class="character-card ornate-border">
@@ -282,6 +287,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Confetti container -->
+    <div id="confetti-container" class="confetti-container"></div>
 
     <!-- Toast 提示 -->
     <div id="toast" class="toast"></div>

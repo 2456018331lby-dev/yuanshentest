@@ -28,9 +28,21 @@ class PersonalityQuiz {
         this._beforeunloadHandler = null;
         this._shareImageData = null;
 
+        // Timer
+        this.timerSeconds = 0;
+        this.timerInterval = null;
+        this.timerStarted = false;
+
+        // Dimension label mapping
+        this.dimLabelMap = {
+            EI: '外向 · 内向', SN: '实感 · 直觉', TF: '思考 · 情感', JP: '判断 · 知觉',
+            AC: '冒险 · 谨慎', LD: '光明 · 黑暗', RC: '规则 · 混沌', HM: '热情 · 冷静'
+        };
+
         this.initElements();
         this.bindEvents();
         this.checkSavedProgress();
+        this.initTheme();
     }
 
     initElements() {
@@ -80,6 +92,13 @@ class PersonalityQuiz {
         this.similarSection = document.getElementById('similar-section');
         this.similarCards = document.getElementById('similar-cards');
         this.shareImageBtn = document.getElementById('share-image-btn');
+
+        // New UI elements
+        this.quizTimer = document.getElementById('quiz-timer');
+        this.progressDotsContainer = document.getElementById('progress-dots');
+        this.resultTime = document.getElementById('result-time');
+        this.confettiContainer = document.getElementById('confetti-container');
+        this.themeToggle = document.getElementById('theme-toggle');
     }
 
     bindEvents() {
@@ -103,6 +122,20 @@ class PersonalityQuiz {
 
         // Sound toggle
         this.soundToggle.addEventListener('click', () => this.toggleSound());
+
+        // Theme toggle
+        this.themeToggle.addEventListener('click', () => this.toggleTheme());
+
+        // Timer pause on tab hidden
+        document.addEventListener('visibilitychange', () => {
+            if (this.timerStarted) {
+                if (document.hidden) {
+                    this.pauseTimer();
+                } else {
+                    this.resumeTimer();
+                }
+            }
+        });
 
         // Dimension pills - click to jump
         this.dimensionPills.addEventListener('click', (e) => {
@@ -357,13 +390,14 @@ class PersonalityQuiz {
         pills.forEach(pill => {
             const dim = pill.dataset.dim;
             pill.classList.remove('active', 'completed');
-            pill.textContent = dim;
+            const label = t('dim_' + dim) || dim;
+            pill.textContent = label;
 
             if (dim === currentDim) {
                 pill.classList.add('active');
             } else if (this.isDimensionComplete(dim)) {
                 pill.classList.add('completed');
-                pill.innerHTML = '<span style="margin-right:2px;">✓</span>' + dim;
+                pill.innerHTML = '<span style="margin-right:2px;">✓</span>' + label;
             }
         });
     }
@@ -400,6 +434,8 @@ class PersonalityQuiz {
         this.answers = [];
         this.clearSavedProgress();
         this.enableExitWarning();
+        this.resetTimer();
+        this.startTimer();
         this.showSkeleton();
         this.landingPage.classList.remove('active');
 
@@ -415,6 +451,8 @@ class PersonalityQuiz {
     continueQuiz() {
         if (this.loadProgress()) {
             this.enableExitWarning();
+            this.resetTimer();
+            this.startTimer();
             this.showSkeleton();
             this.landingPage.classList.remove('active');
 
@@ -457,6 +495,9 @@ class PersonalityQuiz {
 
         // 更新维度进度指示器
         this.updateDimensionPills();
+
+        // 更新进度点
+        this.updateProgressDots();
 
         // 更新选项
         this.optionsContainer.innerHTML = '';
@@ -656,6 +697,15 @@ class PersonalityQuiz {
         this.quizPage.classList.remove('active');
         this.resultPage.classList.add('active');
 
+        // Stop timer and show total time
+        this.stopTimer();
+        if (this.resultTime) {
+            this.resultTime.textContent = `⏱ 用时 ${this.formatTime(this.timerSeconds)}`;
+        }
+
+        // Trigger confetti
+        this.launchConfetti();
+
         const { character, matchPercent, userRadar, top3 } = this.findBestMatch();
         this.currentTopMatches = top3;
 
@@ -804,7 +854,7 @@ class PersonalityQuiz {
         const h = rect.height;
         const cx = w / 2;
         const cy = h / 2;
-        const radius = Math.min(w, h) / 2 - 40;
+        const radius = Math.min(w, h) / 2 - 50;
         const dims = ['EI', 'SN', 'TF', 'JP', 'AC', 'LD', 'RC', 'HM'];
         const dimLabels = tArr('radarLabels');
 
@@ -837,11 +887,11 @@ class PersonalityQuiz {
             ctx.stroke();
 
             // 标签
-            const labelR = radius + 22;
+            const labelR = radius + 28;
             const lx = cx + Math.cos(angle) * labelR;
             const ly = cy + Math.sin(angle) * labelR;
             ctx.fillStyle = '#8a8478';
-            ctx.font = '12px "Noto Sans SC", sans-serif';
+            ctx.font = '11px "Noto Sans SC", sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(dimLabels[j], lx, ly);
@@ -986,6 +1036,7 @@ class PersonalityQuiz {
 
         this.clearSavedProgress();
         this.disableExitWarning();
+        this.resetTimer();
         this.resultPage.classList.remove('active');
         this.landingPage.classList.add('active');
 
@@ -1274,6 +1325,156 @@ class PersonalityQuiz {
         document.body.removeChild(link);
         this.shareImageModal.style.display = 'none';
         this.showToast('分享图已保存！');
+    }
+
+    // ---- Timer ----
+
+    startTimer() {
+        if (this.timerInterval) return;
+        this.timerStarted = true;
+        this.timerInterval = setInterval(() => {
+            this.timerSeconds++;
+            this.updateTimerDisplay();
+        }, 1000);
+    }
+
+    pauseTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+    }
+
+    resumeTimer() {
+        if (this.timerStarted && !this.timerInterval) {
+            this.timerInterval = setInterval(() => {
+                this.timerSeconds++;
+                this.updateTimerDisplay();
+            }, 1000);
+        }
+    }
+
+    stopTimer() {
+        this.pauseTimer();
+        this.timerStarted = false;
+    }
+
+    resetTimer() {
+        this.stopTimer();
+        this.timerSeconds = 0;
+        this.updateTimerDisplay();
+    }
+
+    updateTimerDisplay() {
+        if (this.quizTimer) {
+            this.quizTimer.textContent = '⏱ ' + this.formatTimeMMSS(this.timerSeconds);
+        }
+    }
+
+    formatTimeMMSS(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        if (m > 0) {
+            return `${m}分${s}秒`;
+        }
+        return `${s}秒`;
+    }
+
+    // ---- Progress Dots ----
+
+    buildProgressDots() {
+        if (!this.progressDotsContainer) return;
+        this.progressDotsContainer.innerHTML = '';
+        const dims = ['EI', 'SN', 'TF', 'JP', 'AC', 'LD', 'RC', 'HM'];
+        let questionIndex = 0;
+        dims.forEach((dim, dimIdx) => {
+            const dimQuestions = questions.filter(q => q.dimension === dim);
+            if (dimIdx > 0) {
+                const sep = document.createElement('span');
+                sep.className = 'progress-dot-separator';
+                this.progressDotsContainer.appendChild(sep);
+            }
+            dimQuestions.forEach(() => {
+                const dot = document.createElement('span');
+                dot.className = 'progress-dot';
+                dot.dataset.index = questionIndex;
+                dot.addEventListener('click', () => {
+                    const idx = parseInt(dot.dataset.index);
+                    if (this.answers[idx] && this.answers[idx] !== null) {
+                        this.currentQuestion = idx;
+                        this.saveProgress();
+                        this.showQuestion();
+                    }
+                });
+                this.progressDotsContainer.appendChild(dot);
+                questionIndex++;
+            });
+        });
+    }
+
+    updateProgressDots() {
+        if (!this.progressDotsContainer) return;
+        // Build dots if empty
+        if (this.progressDotsContainer.children.length === 0) {
+            this.buildProgressDots();
+        }
+        const dots = this.progressDotsContainer.querySelectorAll('.progress-dot');
+        dots.forEach((dot, i) => {
+            dot.classList.remove('answered', 'current');
+            if (i === this.currentQuestion) {
+                dot.classList.add('current');
+            } else if (this.answers[i] && this.answers[i] !== null) {
+                dot.classList.add('answered');
+            }
+        });
+    }
+
+    // ---- Confetti ----
+
+    launchConfetti() {
+        if (!this.confettiContainer) return;
+        this.confettiContainer.innerHTML = '';
+        const colors = ['#d4a843', '#f0d78c', '#ff7043', '#4fc3f7', '#7fb069', '#ba68c8', '#90caf9', '#a5d6a7', '#e0a0ff'];
+        for (let i = 0; i < 30; i++) {
+            const piece = document.createElement('div');
+            piece.className = 'confetti-piece';
+            piece.style.left = Math.random() * 100 + '%';
+            piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+            piece.style.animationDelay = Math.random() * 1.5 + 's';
+            piece.style.animationDuration = (2 + Math.random() * 2) + 's';
+            piece.style.width = (5 + Math.random() * 8) + 'px';
+            piece.style.height = (8 + Math.random() * 12) + 'px';
+            this.confettiContainer.appendChild(piece);
+        }
+        setTimeout(() => {
+            if (this.confettiContainer) this.confettiContainer.innerHTML = '';
+        }, 5000);
+    }
+
+    // ---- Theme Toggle ----
+
+    initTheme() {
+        try {
+            const saved = localStorage.getItem('genshin_quiz_theme');
+            if (saved === 'light') {
+                document.body.classList.add('light-mode');
+                if (this.themeToggle) this.themeToggle.textContent = '☀️';
+            }
+        } catch (e) {}
+    }
+
+    toggleTheme() {
+        const isLight = document.body.classList.toggle('light-mode');
+        this.themeToggle.textContent = isLight ? '☀️' : '🌙';
+        try {
+            localStorage.setItem('genshin_quiz_theme', isLight ? 'light' : 'dark');
+        } catch (e) {}
     }
 
     showToast(message) {

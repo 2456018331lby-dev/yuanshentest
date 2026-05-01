@@ -18,14 +18,14 @@ const translations = {
     estimatedTime: "约需 10-15 分钟",
 
     // Dimension preview labels
-    dim_EI: "外向-内向",
-    dim_SN: "实感-直觉",
-    dim_TF: "思考-情感",
-    dim_JP: "判断-知觉",
-    dim_AC: "冒险-谨慎",
-    dim_LD: "光明-黑暗",
-    dim_RC: "规则-混沌",
-    dim_HM: "热情-冷静",
+    dim_EI: "外向 · 内向",
+    dim_SN: "实感 · 直觉",
+    dim_TF: "思考 · 情感",
+    dim_JP: "判断 · 知觉",
+    dim_AC: "冒险 · 谨慎",
+    dim_LD: "光明 · 黑暗",
+    dim_RC: "规则 · 混沌",
+    dim_HM: "热情 · 冷静",
 
     // Quiz page
     backBtn: "上一题",
@@ -63,7 +63,7 @@ const translations = {
     bar_HM: ["热情", "冷静"],
 
     // Radar chart labels
-    radarLabels: ["外向", "实感", "思考", "判断", "冒险", "光明", "规则", "热情"],
+    radarLabels: ["外向·内向", "实感·直觉", "思考·情感", "判断·知觉", "冒险·谨慎", "光明·黑暗", "规则·混沌", "热情·冷静"],
 
     // Modals
     exitTitle: "确定要离开吗？",
@@ -150,7 +150,7 @@ const translations = {
     bar_HM: ["Warm", "Cool"],
 
     // Radar chart labels
-    radarLabels: ["EXTR", "SNSG", "THNK", "JDGE", "ADVN", "LGHT", "RULE", "WARM"],
+    radarLabels: ["EXT·INT", "SEN·INT", "THK·FEL", "JDG·PRC", "ADV·CAU", "LGT·DRK", "RUL·CHS", "WRM·COL"],
 
     // Modals
     exitTitle: "Leave this page?",
@@ -285,6 +285,24 @@ function applyUITranslations() {
 
   const journeyLabel = document.querySelector('.progress-text > span:first-child');
   if (journeyLabel) journeyLabel.textContent = t('teyvatJourney');
+
+  // Update dimension pills labels on language change
+  const pills = document.querySelectorAll('.dim-pill');
+  const pillLabels = {
+    EI: t('dim_EI'), SN: t('dim_SN'), TF: t('dim_TF'), JP: t('dim_JP'),
+    AC: t('dim_AC'), LD: t('dim_LD'), RC: t('dim_RC'), HM: t('dim_HM')
+  };
+  pills.forEach(pill => {
+    const dim = pill.dataset.dim;
+    if (dim && pillLabels[dim]) {
+      // Only update if not showing completed checkmark
+      if (!pill.classList.contains('completed')) {
+        pill.textContent = pillLabels[dim];
+      } else {
+        pill.innerHTML = '<span style="margin-right:2px;">✓</span>' + pillLabels[dim];
+      }
+    }
+  });
 
   // Result page
   const resultTitle = document.querySelector('.result-title');
