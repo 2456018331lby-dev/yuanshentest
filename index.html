@@ -4,16 +4,49 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>原神角色人格测试</title>
-    <meta name="description" content="发现你最像哪位提瓦特大陆的伙伴">
+    <meta name="description" content="8维度64题，精准匹配32位原神角色，发现你最像哪位提瓦特大陆的伙伴">
     <meta property="og:title" content="原神角色人格测试">
     <meta property="og:description" content="8维度64题，精准匹配32位原神角色，发现你最像谁！">
     <meta property="og:type" content="website">
+    <meta property="og:image" content="images/share-preview.png">
+    <meta property="og:url" content="https://yuanshentest.vercel.app/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="原神角色人格测试">
+    <meta name="twitter:description" content="8维度64题，精准匹配32位原神角色，发现你最像谁！">
+    <meta name="twitter:image" content="images/share-preview.png">
     <meta name="theme-color" content="#0c0c14">
+    <link rel="canonical" href="https://yuanshentest.vercel.app/">
+    <link rel="sitemap" type="application/xml" href="sitemap.xml">
     <!-- 字体 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&family=Noto+Serif+SC:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "原神角色人格测试",
+        "description": "8维度64题，精准匹配32位原神角色，发现你最像哪位提瓦特大陆的伙伴",
+        "url": "https://yuanshentest.vercel.app/",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Web",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "CNY"
+        },
+        "inLanguage": ["zh-CN"],
+        "featureList": [
+            "8大性格维度分析",
+            "64道精心设计的题目",
+            "32位原神角色匹配",
+            "雷达图可视化",
+            "进度自动保存"
+        ]
+    }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -74,6 +107,10 @@
                     <button id="back-btn" class="btn-back" title="上一题 (←)">
                         <span class="back-arrow">&#9664;</span> 上一题
                     </button>
+                    <button id="sound-toggle" class="sound-toggle" title="音效开关">
+                        <span class="sound-icon-on">🔊</span>
+                        <span class="sound-icon-off" style="display:none;">🔇</span>
+                    </button>
                     <div class="quiz-nav-hint">按数字键 1-4 选择 · ← 返回 · → 下一题</div>
                 </div>
                 <div class="progress-bar">
@@ -83,18 +120,44 @@
                     <span>提瓦特之旅</span>
                     <span class="question-counter" id="progress-text">1 / 64</span>
                 </div>
+                <!-- 维度进度指示器 -->
+                <div class="dimension-pills" id="dimension-pills">
+                    <span class="dim-pill" data-dim="EI" style="--pill-color: var(--el-pyro)">EI</span>
+                    <span class="dim-pill" data-dim="SN" style="--pill-color: var(--el-hydro)">SN</span>
+                    <span class="dim-pill" data-dim="TF" style="--pill-color: var(--el-anemo)">TF</span>
+                    <span class="dim-pill" data-dim="JP" style="--pill-color: var(--el-geo)">JP</span>
+                    <span class="dim-pill" data-dim="AC" style="--pill-color: var(--el-electro)">AC</span>
+                    <span class="dim-pill" data-dim="LD" style="--pill-color: var(--el-cryo)">LD</span>
+                    <span class="dim-pill" data-dim="RC" style="--pill-color: var(--el-dendro)">RC</span>
+                    <span class="dim-pill" data-dim="HM" style="--pill-color: #e0a0ff">HM</span>
+                </div>
             </div>
 
-            <div class="quiz-content ornate-border">
-                <!-- 四角装饰 -->
-                <span class="corner corner-tl"></span>
-                <span class="corner corner-tr"></span>
-                <span class="corner corner-bl"></span>
-                <span class="corner corner-br"></span>
+            <!-- Loading Skeleton -->
+            <div id="loading-skeleton" class="loading-skeleton" style="display:none;">
+                <div class="skeleton-line skeleton-title"></div>
+                <div class="skeleton-line skeleton-text"></div>
+                <div class="skeleton-line skeleton-text short"></div>
+                <div class="skeleton-options">
+                    <div class="skeleton-option"></div>
+                    <div class="skeleton-option"></div>
+                    <div class="skeleton-option"></div>
+                    <div class="skeleton-option"></div>
+                </div>
+            </div>
 
-                <div class="question-number" id="question-number">Question 01</div>
-                <h2 id="question-text" class="question"></h2>
-                <div id="options-container" class="options"></div>
+            <div id="quiz-content-wrapper">
+                <div class="quiz-content ornate-border">
+                    <!-- 四角装饰 -->
+                    <span class="corner corner-tl"></span>
+                    <span class="corner corner-tr"></span>
+                    <span class="corner corner-bl"></span>
+                    <span class="corner corner-br"></span>
+
+                    <div class="question-number" id="question-number">Question 01</div>
+                    <h2 id="question-text" class="question"></h2>
+                    <div id="options-container" class="options"></div>
+                </div>
             </div>
         </section>
 
@@ -125,6 +188,16 @@
                     <div class="match-score" id="match-score"></div>
                     <p id="character-description" class="character-description"></p>
                     <div class="traits" id="traits"></div>
+                </div>
+
+                <!-- 性格相近角色 -->
+                <div id="similar-section" class="result-section ornate-border" style="display:none;">
+                    <span class="corner corner-tl"></span>
+                    <span class="corner corner-tr"></span>
+                    <span class="corner corner-bl"></span>
+                    <span class="corner corner-br"></span>
+                    <h3 class="section-title">性格相近</h3>
+                    <div id="similar-cards" class="similar-cards"></div>
                 </div>
 
                 <!-- 雷达图 -->
@@ -179,9 +252,34 @@
                 <div class="result-actions">
                     <button id="restart-btn" class="btn-primary">重新测试</button>
                     <button id="share-btn" class="btn-secondary">分享结果</button>
+                    <button id="share-image-btn" class="btn-secondary">生成分享图</button>
                 </div>
             </div>
         </section>
+    </div>
+
+    <!-- 退出确认弹窗 -->
+    <div id="exit-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+            <div class="modal-icon">&#10022;</div>
+            <p class="modal-text">确定要离开吗？<br>答题进度已自动保存</p>
+            <div class="modal-buttons">
+                <button id="exit-continue" class="btn-modal btn-modal-continue">继续答题</button>
+                <button id="exit-leave" class="btn-modal btn-modal-leave">离开</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分享图片预览弹窗 -->
+    <div id="share-image-modal" class="modal-overlay" style="display:none;">
+        <div class="modal-box modal-box-large">
+            <p class="modal-text">分享图片预览</p>
+            <div class="share-image-preview" id="share-image-preview"></div>
+            <div class="modal-buttons">
+                <button id="share-image-download" class="btn-modal btn-modal-continue">下载图片</button>
+                <button id="share-image-close" class="btn-modal btn-modal-leave">关闭</button>
+            </div>
+        </div>
     </div>
 
     <!-- Toast 提示 -->

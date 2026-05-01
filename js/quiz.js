@@ -23,6 +23,10 @@ class PersonalityQuiz {
         this.isAnimating = false;
         this.radarChart = null;
         this.focusedOption = -1;  // For keyboard navigation
+        this.soundEnabled = false;
+        this.currentTopMatches = [];
+        this._beforeunloadHandler = null;
+        this._shareImageData = null;
 
         this.initElements();
         this.bindEvents();
@@ -65,6 +69,17 @@ class PersonalityQuiz {
         this.teammatesBlock = document.getElementById('teammates-block');
         this.avoidBlock = document.getElementById('avoid-block');
         this.matchScore = document.getElementById('match-score');
+
+        // 新增 UI 元素
+        this.dimensionPills = document.getElementById('dimension-pills');
+        this.exitModal = document.getElementById('exit-modal');
+        this.shareImageModal = document.getElementById('share-image-modal');
+        this.soundToggle = document.getElementById('sound-toggle');
+        this.loadingSkeleton = document.getElementById('loading-skeleton');
+        this.quizContentWrapper = document.getElementById('quiz-content-wrapper');
+        this.similarSection = document.getElementById('similar-section');
+        this.similarCards = document.getElementById('similar-cards');
+        this.shareImageBtn = document.getElementById('share-image-btn');
     }
 
     bindEvents() {
@@ -74,6 +89,36 @@ class PersonalityQuiz {
         this.backBtn.addEventListener('click', () => this.goToPreviousQuestion());
         this.restartBtn.addEventListener('click', () => this.restartQuiz());
         this.shareBtn.addEventListener('click', () => this.shareResult());
+        this.shareImageBtn.addEventListener('click', () => this.generateShareImage());
+
+        // Exit modal
+        document.getElementById('exit-continue').addEventListener('click', () => this.hideExitModal());
+        document.getElementById('exit-leave').addEventListener('click', () => this.confirmExit());
+
+        // Share image modal
+        document.getElementById('share-image-download').addEventListener('click', () => this.downloadShareImage());
+        document.getElementById('share-image-close').addEventListener('click', () => {
+            this.shareImageModal.style.display = 'none';
+        });
+
+        // Sound toggle
+        this.soundToggle.addEventListener('click', () => this.toggleSound());
+
+        // Dimension pills - click to jump
+        this.dimensionPills.addEventListener('click', (e) => {
+            const pill = e.target.closest('.dim-pill');
+            if (!pill || !pill.classList.contains('completed')) return;
+            const dim = pill.dataset.dim;
+            const idx = this.getDimensionFirstQuestion(dim);
+            if (idx >= 0 && idx !== this.currentQuestion) {
+                this.currentQuestion = idx;
+                this.saveProgress();
+                this.showQuestion();
+            }
+        });
+
+        // Landing page "返回首页" handling - intercept navigation on quiz page
+        // (the exit modal is triggered by beforeunload and explicit back-to-landing actions)
 
         // 键盘支持
         document.addEventListener('keydown', (e) => {
@@ -137,6 +182,42 @@ class PersonalityQuiz {
         if (next < 0) next = options.length - 1;
         if (next >= options.length) next = 0;
         this.focusOption(next);
+    }
+
+    // ---- Sound ----
+
+    toggleSound() {
+        this.soundEnabled = !this.soundEnabled;
+        const onIcon = this.soundToggle.querySelector('.sound-icon-on');
+        const offIcon = this.soundToggle.querySelector('.sound-icon-off');
+        if (this.soundEnabled) {
+            onIcon.style.display = '';
+            offIcon.style.display = 'none';
+            this.showToast('音效已开启');
+        } else {
+            onIcon.style.display = 'none';
+            offIcon.style.display = '';
+            this.showToast('音效已关闭');
+        }
+    }
+
+    playClickSound() {
+        if (!this.soundEnabled) return;
+        try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = 800;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.08, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.1);
+        } catch (e) {
+            // Silently fail
+        }
     }
 
     // ---- Progress Save/Restore ----
@@ -208,6 +289,109 @@ class PersonalityQuiz {
         this.showToast('进度已清除');
     }
 
+    // ---- Exit Confirmation ----
+
+    enableExitWarning() {
+        this._beforeunloadHandler = (e) => {
+            const hasAnswers = this.answers.some(a => a !== null && a !== undefined);
+            if (hasAnswers) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', this._beforeunloadHandler);
+    }
+
+    disableExitWarning() {
+        if (this._beforeunloadHandler) {
+            window.removeEventListener('beforeunload', this._beforeunloadHandler);
+            this._beforeunloadHandler = null;
+        }
+    }
+
+    showExitModal() {
+        const hasAnswers = this.answers.some(a => a !== null && a !== undefined);
+        if (!hasAnswers) {
+            this.performExit();
+            return;
+        }
+        this.exitModal.style.display = 'flex';
+    }
+
+    hideExitModal() {
+        this.exitModal.style.display = 'none';
+    }
+
+    confirmExit() {
+        this.hideExitModal();
+        this.performExit();
+    }
+
+    performExit() {
+        this.disableExitWarning();
+        this.saveProgress();
+        this.quizPage.classList.remove('active');
+        this.landingPage.classList.add('active');
+        this.checkSavedProgress();
+    }
+
+    // ---- Dimension Pills ----
+
+    getDimensionFirstQuestion(dim) {
+        return questions.findIndex(q => q.dimension === dim);
+    }
+
+    isDimensionComplete(dim) {
+        // A dimension is complete if all questions of that dimension have been answered
+        return questions.every(q => {
+            if (q.dimension !== dim) return true;
+            const idx = q.id - 1;
+            return this.answers[idx] && this.answers[idx] !== null;
+        });
+    }
+
+    updateDimensionPills() {
+        const currentDim = questions[this.currentQuestion]?.dimension;
+        const pills = this.dimensionPills.querySelectorAll('.dim-pill');
+
+        pills.forEach(pill => {
+            const dim = pill.dataset.dim;
+            pill.classList.remove('active', 'completed');
+            pill.textContent = dim;
+
+            if (dim === currentDim) {
+                pill.classList.add('active');
+            } else if (this.isDimensionComplete(dim)) {
+                pill.classList.add('completed');
+                pill.innerHTML = '<span style="margin-right:2px;">✓</span>' + dim;
+            }
+        });
+    }
+
+    // ---- Counter Animation ----
+
+    animateCounter(direction) {
+        this.progressText.classList.remove('counter-animate-up', 'counter-animate-down');
+        void this.progressText.offsetWidth; // force reflow
+        this.progressText.classList.add(direction > 0 ? 'counter-animate-up' : 'counter-animate-down');
+    }
+
+    // ---- Loading Skeleton ----
+
+    showSkeleton() {
+        if (this.loadingSkeleton && this.quizContentWrapper) {
+            this.loadingSkeleton.style.display = '';
+            this.quizContentWrapper.style.display = 'none';
+        }
+    }
+
+    hideSkeleton() {
+        if (this.loadingSkeleton && this.quizContentWrapper) {
+            this.loadingSkeleton.style.display = 'none';
+            this.quizContentWrapper.style.display = '';
+        }
+    }
+
     // ---- Quiz Flow ----
 
     startQuiz() {
@@ -215,16 +399,32 @@ class PersonalityQuiz {
         this.scores = { EI: 0, SN: 0, TF: 0, JP: 0, AC: 0, LD: 0, RC: 0, HM: 0 };
         this.answers = [];
         this.clearSavedProgress();
+        this.enableExitWarning();
+        this.showSkeleton();
         this.landingPage.classList.remove('active');
-        this.quizPage.classList.add('active');
-        this.showQuestion();
+
+        setTimeout(() => {
+            this.quizPage.classList.add('active');
+            setTimeout(() => {
+                this.hideSkeleton();
+                this.showQuestion();
+            }, 300);
+        }, 100);
     }
 
     continueQuiz() {
         if (this.loadProgress()) {
+            this.enableExitWarning();
+            this.showSkeleton();
             this.landingPage.classList.remove('active');
-            this.quizPage.classList.add('active');
-            this.showQuestion(true); // true = isResuming
+
+            setTimeout(() => {
+                this.quizPage.classList.add('active');
+                setTimeout(() => {
+                    this.hideSkeleton();
+                    this.showQuestion(true); // true = isResuming
+                }, 300);
+            }, 100);
         } else {
             this.showToast('无法恢复进度，将重新开始');
             this.startQuiz();
@@ -233,11 +433,20 @@ class PersonalityQuiz {
 
     showQuestion(isResuming = false) {
         const question = questions[this.currentQuestion];
+        const prevCounter = this.progressText.textContent;
 
         // 更新进度
         const progress = ((this.currentQuestion + 1) / questions.length) * 100;
         this.progressFill.style.width = `${progress}%`;
-        this.progressText.textContent = `${this.currentQuestion + 1} / ${questions.length}`;
+        const newCounterText = `${this.currentQuestion + 1} / ${questions.length}`;
+        this.progressText.textContent = newCounterText;
+
+        // Counter animation
+        if (prevCounter && prevCounter !== newCounterText) {
+            const prevNum = parseInt(prevCounter);
+            const newNum = this.currentQuestion + 1;
+            this.animateCounter(newNum > prevNum ? 1 : -1);
+        }
 
         // 更新题号和题目
         this.questionNumber.textContent = `Question ${String(this.currentQuestion + 1).padStart(2, '0')}`;
@@ -245,6 +454,9 @@ class PersonalityQuiz {
 
         // 显示/隐藏返回按钮
         this.backBtn.style.visibility = this.currentQuestion > 0 ? 'visible' : 'hidden';
+
+        // 更新维度进度指示器
+        this.updateDimensionPills();
 
         // 更新选项
         this.optionsContainer.innerHTML = '';
@@ -293,6 +505,9 @@ class PersonalityQuiz {
         if (this.isAnimating) return;
         this.isAnimating = true;
 
+        // Play click sound
+        this.playClickSound();
+
         // If we had a previous answer for this question (going back then forward), remove its score first
         const existingAnswer = this.answers[this.currentQuestion];
         if (existingAnswer && existingAnswer.selected) {
@@ -331,6 +546,7 @@ class PersonalityQuiz {
                 this.transitionToNextQuestion();
             } else {
                 this.clearSavedProgress();
+                this.disableExitWarning();
                 this.showResult();
             }
         }, 600);
@@ -398,40 +614,50 @@ class PersonalityQuiz {
         return radar;
     }
 
-    // 通过欧氏距离匹配最相似角色
+    // 通过欧氏距离匹配最相似角色 - 返回 top 3
     findBestMatch() {
         const userRadar = this.calculateRadarScores();
         const dims = ['EI', 'SN', 'TF', 'JP', 'AC', 'LD', 'RC', 'HM'];
 
-        let bestMatch = null;
-        let minDistance = Infinity;
+        const results = [];
 
         Object.values(characters).forEach(char => {
             let distance = 0;
-            dims.forEach(dim => {
-                const diff = userRadar[dim] - char.radar[dims.indexOf(dim)];
+            dims.forEach((dim, i) => {
+                const diff = userRadar[dim] - char.radar[i];
                 distance += diff * diff;
             });
             distance = Math.sqrt(distance);
 
-            if (distance < minDistance) {
-                minDistance = distance;
-                bestMatch = char;
-            }
+            // 匹配度：距离最大约 282.8 (8*100^2 开根)，转换为百分比
+            const maxPossible = Math.sqrt(8 * 100 * 100);
+            const matchPercent = Math.max(0, Math.round((1 - distance / maxPossible) * 100));
+
+            results.push({ character: char, matchPercent, distance });
         });
 
-        // 匹配度：距离最大约 800 (8*100^2 开根)，转换为百分比
-        const maxPossible = Math.sqrt(8 * 100 * 100); // ~282.8
-        const matchPercent = Math.max(0, Math.round((1 - minDistance / maxPossible) * 100));
+        // Sort by distance (ascending)
+        results.sort((a, b) => a.distance - b.distance);
 
-        return { character: bestMatch, matchPercent, userRadar };
+        const top3 = results.slice(0, 3).map(r => ({
+            character: r.character,
+            matchPercent: r.matchPercent
+        }));
+
+        return {
+            character: top3[0].character,
+            matchPercent: top3[0].matchPercent,
+            userRadar,
+            top3
+        };
     }
 
     showResult() {
         this.quizPage.classList.remove('active');
         this.resultPage.classList.add('active');
 
-        const { character, matchPercent, userRadar } = this.findBestMatch();
+        const { character, matchPercent, userRadar, top3 } = this.findBestMatch();
+        this.currentTopMatches = top3;
 
         if (character) {
             // 设置角色内容
@@ -469,6 +695,24 @@ class PersonalityQuiz {
                 tag.textContent = trait;
                 this.traits.appendChild(tag);
             });
+
+            // Top 3 相似角色
+            if (this.similarSection && this.similarCards && top3.length > 1) {
+                this.similarSection.style.display = '';
+                this.similarCards.innerHTML = '';
+                for (let i = 1; i < top3.length; i++) {
+                    const match = top3[i];
+                    const card = document.createElement('div');
+                    card.className = 'similar-card';
+                    card.innerHTML = `
+                        <span class="similar-card-emoji">${match.character.emoji}</span>
+                        <div class="similar-card-name">${match.character.name}</div>
+                        <div class="similar-card-element">${elementIcons[match.character.element] || ''} ${match.character.element}元素 · ${match.character.title}</div>
+                        <div class="similar-card-match">匹配度 <span>${match.matchPercent}%</span></div>
+                    `;
+                    this.similarCards.appendChild(card);
+                }
+            }
 
             // 雷达图
             if (this.radarCanvas) {
@@ -694,12 +938,13 @@ class PersonalityQuiz {
             { el: this.matchScore, delay: 300, type: 'stagger-in' },
             { el: this.characterDescription, delay: 400, type: 'stagger-in' },
             { el: this.traits, delay: 550, type: 'stagger-in' },
-            { el: this.radarCanvas?.parentElement, delay: 600, type: 'stagger-in' },
-            { el: this.dimensionBars, delay: 700, type: 'stagger-in' },
-            { el: this.quoteBlock, delay: 800, type: 'stagger-in' },
-            { el: this.playstyleBlock, delay: 900, type: 'stagger-in' },
-            { el: this.teammatesBlock, delay: 1000, type: 'stagger-in' },
-            { el: this.avoidBlock, delay: 1100, type: 'stagger-in' }
+            { el: this.similarSection, delay: 600, type: 'stagger-in' },
+            { el: this.radarCanvas?.parentElement, delay: 700, type: 'stagger-in' },
+            { el: this.dimensionBars, delay: 800, type: 'stagger-in' },
+            { el: this.quoteBlock, delay: 900, type: 'stagger-in' },
+            { el: this.playstyleBlock, delay: 1000, type: 'stagger-in' },
+            { el: this.teammatesBlock, delay: 1100, type: 'stagger-in' },
+            { el: this.avoidBlock, delay: 1200, type: 'stagger-in' }
         ];
 
         // 头像特殊动画
@@ -737,8 +982,10 @@ class PersonalityQuiz {
         this.answers = [];
         this.isAnimating = false;
         this.focusedOption = -1;
+        this.currentTopMatches = [];
 
         this.clearSavedProgress();
+        this.disableExitWarning();
         this.resultPage.classList.remove('active');
         this.landingPage.classList.add('active');
 
@@ -773,6 +1020,256 @@ class PersonalityQuiz {
         }).catch(() => {
             this.showToast('复制失败，请手动复制');
         });
+    }
+
+    // ---- Share Image Generation ----
+
+    generateShareImage() {
+        const { character, matchPercent, userRadar, top3 } = this.currentTopMatches.length > 0
+            ? { character: this.currentTopMatches[0].character, matchPercent: this.currentTopMatches[0].matchPercent, userRadar: this.calculateRadarScores(), top3: this.currentTopMatches }
+            : this.findBestMatch();
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        const W = 750, H = 1334;
+        canvas.width = W;
+        canvas.height = H;
+
+        // Dark background
+        ctx.fillStyle = '#0c0c14';
+        ctx.fillRect(0, 0, W, H);
+
+        // Background gradient
+        const grad = ctx.createRadialGradient(W / 2, H * 0.25, 0, W / 2, H * 0.25, W * 0.6);
+        grad.addColorStop(0, 'rgba(212, 168, 67, 0.08)');
+        grad.addColorStop(1, 'transparent');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Border decoration
+        ctx.strokeStyle = 'rgba(212, 168, 67, 0.15)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(30, 30, W - 60, H - 60);
+
+        // Corner decorations
+        const corners = [
+            [30, 30], [W - 46, 30], [30, H - 46], [W - 46, H - 46]
+        ];
+        corners.forEach(([x, y]) => {
+            ctx.fillStyle = 'rgba(212, 168, 67, 0.4)';
+            ctx.fillRect(x, y, 16, 16);
+        });
+
+        // Title
+        ctx.fillStyle = '#d4a843';
+        ctx.font = '600 36px "Noto Serif SC", serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('原神角色人格测试', W / 2, 90);
+
+        // Subtitle
+        ctx.fillStyle = '#8a8478';
+        ctx.font = '18px "Noto Sans SC", sans-serif';
+        ctx.fillText('发现你最像哪位提瓦特大陆的伙伴', W / 2, 130);
+
+        // Decorative line
+        ctx.strokeStyle = 'rgba(212, 168, 67, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(W * 0.25, 155);
+        ctx.lineTo(W * 0.75, 155);
+        ctx.stroke();
+
+        // Center ornament
+        ctx.fillStyle = '#d4a843';
+        ctx.font = '16px sans-serif';
+        ctx.fillText('✦', W / 2, 160);
+
+        // Character emoji (large)
+        ctx.font = '100px sans-serif';
+        ctx.fillText(character.emoji, W / 2, 290);
+
+        // Character name
+        ctx.fillStyle = '#f0d78c';
+        ctx.font = '700 48px "Noto Serif SC", serif';
+        ctx.fillText(character.name, W / 2, 360);
+
+        // Character title
+        ctx.fillStyle = '#8a8478';
+        ctx.font = '22px "Noto Sans SC", sans-serif';
+        ctx.fillText(character.title, W / 2, 400);
+
+        // Match percentage
+        ctx.fillStyle = '#d4a843';
+        ctx.font = '600 32px "Noto Sans SC", sans-serif';
+        ctx.fillText(`匹配度 ${matchPercent}%`, W / 2, 455);
+
+        // Personality type
+        const typeLabels = this.getDimensionLabels();
+        ctx.fillStyle = 'rgba(212, 168, 67, 0.15)';
+        const typeWidth = ctx.measureText(typeLabels).width + 40;
+        const typeX = W / 2 - typeWidth / 2;
+        ctx.beginPath();
+        ctx.roundRect(typeX, 475, typeWidth, 36, 18);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(212, 168, 67, 0.35)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.fillStyle = '#d4a843';
+        ctx.font = '600 18px "Noto Sans SC", sans-serif';
+        ctx.fillText(typeLabels, W / 2, 499);
+
+        // Mini radar chart
+        this.drawMiniRadar(ctx, userRadar, W / 2, 640, 140);
+
+        // Dimension bars summary
+        const dims = ['EI', 'SN', 'TF', 'JP', 'AC', 'LD', 'RC', 'HM'];
+        const dimLabels = ['外向', '实感', '思考', '判断', '冒险', '光明', '规则', '热情'];
+        const dimColors = ['#ff7043', '#4fc3f7', '#7fb069', '#d4a843', '#ba68c8', '#90caf9', '#a5d6a7', '#e0a0ff'];
+
+        ctx.textAlign = 'left';
+        ctx.font = '15px "Noto Sans SC", sans-serif';
+        dims.forEach((dim, i) => {
+            const y = 830 + i * 40;
+            const val = userRadar[dim];
+
+            // Label
+            ctx.fillStyle = '#8a8478';
+            ctx.textAlign = 'right';
+            ctx.fillText(dimLabels[i], 190, y);
+
+            // Bar track
+            ctx.fillStyle = 'rgba(255,255,255,0.04)';
+            ctx.beginPath();
+            ctx.roundRect(210, y - 14, 330, 16, 4);
+            ctx.fill();
+
+            // Bar fill
+            ctx.fillStyle = dimColors[i];
+            ctx.beginPath();
+            ctx.roundRect(210, y - 14, 330 * val / 100, 16, 4);
+            ctx.fill();
+
+            // Percentage
+            ctx.fillStyle = '#f0e6d2';
+            ctx.textAlign = 'left';
+            ctx.fillText(`${val}%`, 550, y);
+        });
+
+        // Footer
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#5a5548';
+        ctx.font = '14px "Noto Sans SC", sans-serif';
+        ctx.fillText('原神角色人格测试 · 8维度64题 · 32位角色', W / 2, H - 60);
+
+        // Decorative line at bottom
+        ctx.strokeStyle = 'rgba(212, 168, 67, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(W * 0.3, H - 85);
+        ctx.lineTo(W * 0.7, H - 85);
+        ctx.stroke();
+        ctx.fillStyle = '#d4a843';
+        ctx.font = '14px sans-serif';
+        ctx.fillText('✦', W / 2, H - 82);
+
+        // Store the image data
+        this._shareImageData = canvas.toDataURL('image/png');
+
+        // Show preview in modal
+        const previewContainer = document.getElementById('share-image-preview');
+        const img = new Image();
+        img.src = this._shareImageData;
+        img.style.width = '100%';
+        img.style.height = 'auto';
+        previewContainer.innerHTML = '';
+        previewContainer.appendChild(img);
+
+        this.shareImageModal.style.display = 'flex';
+    }
+
+    drawMiniRadar(ctx, radar, cx, cy, radius) {
+        const dims = ['EI', 'SN', 'TF', 'JP', 'AC', 'LD', 'RC', 'HM'];
+
+        // Grid
+        for (let i = 1; i <= 4; i++) {
+            ctx.beginPath();
+            const r = (radius / 4) * i;
+            for (let j = 0; j < 8; j++) {
+                const angle = (Math.PI * 2 / 8) * j - Math.PI / 2;
+                const x = cx + Math.cos(angle) * r;
+                const y = cy + Math.sin(angle) * r;
+                if (j === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.strokeStyle = i === 4 ? 'rgba(212, 168, 67, 0.2)' : 'rgba(255, 255, 255, 0.04)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // Axes
+        for (let j = 0; j < 8; j++) {
+            const angle = (Math.PI * 2 / 8) * j - Math.PI / 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.cos(angle) * radius, cy + Math.sin(angle) * radius);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+            ctx.stroke();
+        }
+
+        // User data polygon
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            const angle = (Math.PI * 2 / 8) * i - Math.PI / 2;
+            const r = (radar[dims[i]] / 100) * radius;
+            const x = cx + Math.cos(angle) * r;
+            const y = cy + Math.sin(angle) * r;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(79, 195, 247, 0.15)';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(79, 195, 247, 0.7)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Dots
+        for (let i = 0; i < 8; i++) {
+            const angle = (Math.PI * 2 / 8) * i - Math.PI / 2;
+            const r = (radar[dims[i]] / 100) * radius;
+            const x = cx + Math.cos(angle) * r;
+            const y = cy + Math.sin(angle) * r;
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(79, 195, 247, 0.8)';
+            ctx.fill();
+        }
+
+        // Labels
+        const dimLabels = ['外向', '实感', '思考', '判断', '冒险', '光明', '规则', '热情'];
+        ctx.fillStyle = '#8a8478';
+        ctx.font = '12px "Noto Sans SC", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        for (let j = 0; j < 8; j++) {
+            const angle = (Math.PI * 2 / 8) * j - Math.PI / 2;
+            const lr = radius + 18;
+            ctx.fillText(dimLabels[j], cx + Math.cos(angle) * lr, cy + Math.sin(angle) * lr);
+        }
+    }
+
+    downloadShareImage() {
+        if (!this._shareImageData) return;
+        const link = document.createElement('a');
+        link.download = '原神人格测试结果.png';
+        link.href = this._shareImageData;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        this.shareImageModal.style.display = 'none';
+        this.showToast('分享图已保存！');
     }
 
     showToast(message) {
