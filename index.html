@@ -47,7 +47,13 @@
                     <div class="dim-preview-item"><span class="dim-dot" style="background: #e0a0ff"></span>热情-冷静</div>
                 </div>
 
-                <button id="start-btn" class="btn-primary btn-pulse">开始测试</button>
+                <div class="landing-buttons">
+                    <button id="start-btn" class="btn-primary btn-pulse">开始测试</button>
+                    <button id="continue-btn" class="btn-continue" style="display:none;">继续测试</button>
+                </div>
+                <div id="clear-progress-wrap" class="clear-progress-wrap" style="display:none;">
+                    <button id="clear-progress-btn" class="btn-clear">清除进度</button>
+                </div>
 
                 <div class="landing-footer">
                     <span>共 64 道题目</span>
@@ -64,6 +70,12 @@
         <!-- ========== 测试页 ========== -->
         <section id="quiz-page" class="page">
             <div class="quiz-header">
+                <div class="quiz-header-bar">
+                    <button id="back-btn" class="btn-back" title="上一题 (←)">
+                        <span class="back-arrow">&#9664;</span> 上一题
+                    </button>
+                    <div class="quiz-nav-hint">按数字键 1-4 选择 · ← 返回 · → 下一题</div>
+                </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>

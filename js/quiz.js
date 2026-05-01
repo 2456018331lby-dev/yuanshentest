@@ -2,6 +2,9 @@
 // 原神角色人格测试 - 8维度交互逻辑
 // ============================================
 
+const STORAGE_KEY = 'genshinPersonalityProgress';
+const RESULT_KEY = 'genshinPersonalityResult';
+
 class PersonalityQuiz {
     constructor() {
         this.currentQuestion = 0;
@@ -16,12 +19,14 @@ class PersonalityQuiz {
             RC: 0,  // 正=R, 负=C(混沌)
             HM: 0   // 正=H, 负=M
         };
-        this.answers = [];
+        this.answers = [];  // Each: { questionId, selected, selectedIndex }
         this.isAnimating = false;
         this.radarChart = null;
+        this.focusedOption = -1;  // For keyboard navigation
 
         this.initElements();
         this.bindEvents();
+        this.checkSavedProgress();
     }
 
     initElements() {
@@ -30,6 +35,10 @@ class PersonalityQuiz {
         this.resultPage = document.getElementById('result-page');
 
         this.startBtn = document.getElementById('start-btn');
+        this.continueBtn = document.getElementById('continue-btn');
+        this.clearProgressBtn = document.getElementById('clear-progress-btn');
+        this.clearProgressWrap = document.getElementById('clear-progress-wrap');
+        this.backBtn = document.getElementById('back-btn');
         this.restartBtn = document.getElementById('restart-btn');
         this.shareBtn = document.getElementById('share-btn');
 
@@ -60,6 +69,9 @@ class PersonalityQuiz {
 
     bindEvents() {
         this.startBtn.addEventListener('click', () => this.startQuiz());
+        this.continueBtn.addEventListener('click', () => this.continueQuiz());
+        this.clearProgressBtn.addEventListener('click', () => this.clearProgress());
+        this.backBtn.addEventListener('click', () => this.goToPreviousQuestion());
         this.restartBtn.addEventListener('click', () => this.restartQuiz());
         this.shareBtn.addEventListener('click', () => this.shareResult());
 
@@ -68,23 +80,158 @@ class PersonalityQuiz {
             if (!this.quizPage.classList.contains('active')) return;
             if (this.isAnimating) return;
 
-            const key = parseInt(e.key);
-            if (key >= 1 && key <= 4) {
-                const options = this.optionsContainer.querySelectorAll('.option');
-                if (options[key - 1]) {
-                    options[key - 1].click();
+            switch (e.key) {
+                case '1': case '2': case '3': case '4': {
+                    const idx = parseInt(e.key) - 1;
+                    const options = this.optionsContainer.querySelectorAll('.option');
+                    if (options[idx] && !options[idx].classList.contains('disabled')) {
+                        options[idx].click();
+                    }
+                    break;
                 }
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    this.goToPreviousQuestion();
+                    break;
+                case 'ArrowRight':
+                case 'Enter': {
+                    e.preventDefault();
+                    // If there's a focused option, click it; otherwise do nothing
+                    const options = this.optionsContainer.querySelectorAll('.option');
+                    if (this.focusedOption >= 0 && this.focusedOption < options.length) {
+                        if (!options[this.focusedOption].classList.contains('disabled')) {
+                            options[this.focusedOption].click();
+                        }
+                    } else {
+                        // Focus first option
+                        this.focusOption(0);
+                    }
+                    break;
+                }
+                case 'ArrowDown':
+                    e.preventDefault();
+                    this.moveFocus(1);
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    this.moveFocus(-1);
+                    break;
             }
         });
     }
 
+    focusOption(index) {
+        const options = this.optionsContainer.querySelectorAll('.option');
+        // Remove previous focus
+        options.forEach(opt => opt.classList.remove('focused'));
+        if (index >= 0 && index < options.length) {
+            this.focusedOption = index;
+            options[index].classList.add('focused');
+        }
+    }
+
+    moveFocus(direction) {
+        const options = this.optionsContainer.querySelectorAll('.option');
+        if (options.length === 0) return;
+        let next = this.focusedOption + direction;
+        if (next < 0) next = options.length - 1;
+        if (next >= options.length) next = 0;
+        this.focusOption(next);
+    }
+
+    // ---- Progress Save/Restore ----
+
+    checkSavedProgress() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (data && data.currentQuestion > 0 && data.answers && data.answers.length > 0) {
+                    this.continueBtn.style.display = '';
+                    this.clearProgressWrap.style.display = '';
+                }
+            }
+        } catch (e) {
+            // Ignore corrupt data
+        }
+    }
+
+    saveProgress() {
+        try {
+            const data = {
+                currentQuestion: this.currentQuestion,
+                scores: { ...this.scores },
+                answers: this.answers.map(a => a ? {
+                    questionId: a.questionId,
+                    selectedIndex: a.selectedIndex
+                } : null)
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        } catch (e) {
+            // Silently fail if localStorage unavailable
+        }
+    }
+
+    loadProgress() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+            if (!saved) return false;
+            this.currentQuestion = saved.currentQuestion || 0;
+            this.scores = saved.scores || this.scores;
+            // Rebuild answers from saved selectedIndex
+            this.answers = (saved.answers || []).map(a => {
+                if (!a) return null;
+                const q = questions.find(qn => qn.id === a.questionId);
+                const opt = q ? q.options[a.selectedIndex] : null;
+                return {
+                    questionId: a.questionId,
+                    selected: opt,
+                    selectedIndex: a.selectedIndex
+                };
+            });
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    clearSavedProgress() {
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (e) {}
+    }
+
+    clearProgress() {
+        this.clearSavedProgress();
+        this.continueBtn.style.display = 'none';
+        this.clearProgressWrap.style.display = 'none';
+        this.showToast('进度已清除');
+    }
+
+    // ---- Quiz Flow ----
+
     startQuiz() {
+        this.currentQuestion = 0;
+        this.scores = { EI: 0, SN: 0, TF: 0, JP: 0, AC: 0, LD: 0, RC: 0, HM: 0 };
+        this.answers = [];
+        this.clearSavedProgress();
         this.landingPage.classList.remove('active');
         this.quizPage.classList.add('active');
         this.showQuestion();
     }
 
-    showQuestion() {
+    continueQuiz() {
+        if (this.loadProgress()) {
+            this.landingPage.classList.remove('active');
+            this.quizPage.classList.add('active');
+            this.showQuestion(true); // true = isResuming
+        } else {
+            this.showToast('无法恢复进度，将重新开始');
+            this.startQuiz();
+        }
+    }
+
+    showQuestion(isResuming = false) {
         const question = questions[this.currentQuestion];
 
         // 更新进度
@@ -96,8 +243,12 @@ class PersonalityQuiz {
         this.questionNumber.textContent = `Question ${String(this.currentQuestion + 1).padStart(2, '0')}`;
         this.questionText.textContent = question.question;
 
+        // 显示/隐藏返回按钮
+        this.backBtn.style.visibility = this.currentQuestion > 0 ? 'visible' : 'hidden';
+
         // 更新选项
         this.optionsContainer.innerHTML = '';
+        this.focusedOption = -1;
         question.options.forEach((option, index) => {
             const button = document.createElement('button');
             button.className = 'option';
@@ -105,9 +256,21 @@ class PersonalityQuiz {
                 <span class="option-key">${index + 1}</span>
                 <span class="option-text">${option.text}</span>
             `;
-            button.addEventListener('click', () => this.selectOption(option, button));
+            button.addEventListener('click', () => this.selectOption(option, button, index));
             this.optionsContainer.appendChild(button);
         });
+
+        // 如果是返回到这题，高亮之前选过的选项
+        const existingAnswer = this.answers[this.currentQuestion];
+        if (existingAnswer && existingAnswer.selectedIndex !== undefined) {
+            const allOptions = this.optionsContainer.querySelectorAll('.option');
+            allOptions.forEach(opt => opt.classList.add('disabled'));
+            const prevBtn = allOptions[existingAnswer.selectedIndex];
+            if (prevBtn) {
+                prevBtn.classList.remove('disabled');
+                prevBtn.classList.add('previously-selected');
+            }
+        }
 
         // 入场动画
         this.animateQuestionIn();
@@ -126,35 +289,70 @@ class PersonalityQuiz {
         });
     }
 
-    selectOption(option, buttonElement) {
+    selectOption(option, buttonElement, optionIndex) {
         if (this.isAnimating) return;
         this.isAnimating = true;
 
-        // 记录答案
-        this.answers.push({
+        // If we had a previous answer for this question (going back then forward), remove its score first
+        const existingAnswer = this.answers[this.currentQuestion];
+        if (existingAnswer && existingAnswer.selected) {
+            const dim = questions[this.currentQuestion].dimension;
+            this.scores[dim] -= existingAnswer.selected.score;
+        }
+
+        // Record/overwrite answer for this question
+        this.answers[this.currentQuestion] = {
             questionId: questions[this.currentQuestion].id,
-            selected: option
-        });
+            selected: option,
+            selectedIndex: optionIndex
+        };
 
         // 更新分数（累加score，可以是正负）
         const dim = questions[this.currentQuestion].dimension;
         this.scores[dim] += option.score;
 
+        // Save progress
+        this.saveProgress();
+
         // 视觉反馈
         const allOptions = this.optionsContainer.querySelectorAll('.option');
-        allOptions.forEach(opt => opt.classList.add('disabled'));
+        allOptions.forEach(opt => {
+            opt.classList.remove('previously-selected', 'focused');
+            opt.classList.add('disabled');
+        });
         buttonElement.classList.remove('disabled');
         buttonElement.classList.add('selected');
 
         // 延迟后进入下一题
         setTimeout(() => {
             this.currentQuestion++;
+            // If we've already answered questions ahead (went back), skip forward
             if (this.currentQuestion < questions.length) {
                 this.transitionToNextQuestion();
             } else {
+                this.clearSavedProgress();
                 this.showResult();
             }
         }, 600);
+    }
+
+    goToPreviousQuestion() {
+        if (this.isAnimating) return;
+        if (this.currentQuestion <= 0) return;
+
+        // Subtract current question's score if it was answered
+        const existingAnswer = this.answers[this.currentQuestion];
+        if (existingAnswer && existingAnswer.selected) {
+            const dim = questions[this.currentQuestion].dimension;
+            this.scores[dim] -= existingAnswer.selected.score;
+        }
+
+        // Null out the answer so it won't double-subtract when going forward again
+        this.answers[this.currentQuestion] = null;
+
+        this.currentQuestion--;
+        this.saveProgress();
+        this.transitionToPreviousQuestion();
     }
 
     transitionToNextQuestion() {
@@ -163,6 +361,21 @@ class PersonalityQuiz {
             el.style.transition = `all 0.3s ease ${i * 0.03}s`;
             el.style.opacity = '0';
             el.style.transform = 'translateX(-20px)';
+        });
+
+        setTimeout(() => {
+            this.showQuestion();
+            this.isAnimating = false;
+        }, 350);
+    }
+
+    transitionToPreviousQuestion() {
+        this.isAnimating = true;
+        const elements = [this.questionNumber, this.questionText, ...this.optionsContainer.children];
+        elements.forEach((el, i) => {
+            el.style.transition = `all 0.3s ease ${i * 0.03}s`;
+            el.style.opacity = '0';
+            el.style.transform = 'translateX(20px)';
         });
 
         setTimeout(() => {
@@ -312,12 +525,14 @@ class PersonalityQuiz {
             this.animateResultIn();
 
             // 保存结果到本地存储
-            localStorage.setItem('genshinPersonalityResult', JSON.stringify({
-                character: character.name,
-                matchPercent,
-                radar: userRadar,
-                date: new Date().toISOString()
-            }));
+            try {
+                localStorage.setItem(RESULT_KEY, JSON.stringify({
+                    character: character.name,
+                    matchPercent,
+                    radar: userRadar,
+                    date: new Date().toISOString()
+                }));
+            } catch (e) {}
         }
 
         this.isAnimating = false;
@@ -381,7 +596,7 @@ class PersonalityQuiz {
             const labelR = radius + 22;
             const lx = cx + Math.cos(angle) * labelR;
             const ly = cy + Math.sin(angle) * labelR;
-            ctx.fillStyle = 'var(--text-secondary)';
+            ctx.fillStyle = '#8a8478';
             ctx.font = '12px "Noto Sans SC", sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -398,14 +613,14 @@ class PersonalityQuiz {
         // 图例
         ctx.fillStyle = 'rgba(212, 168, 67, 0.8)';
         ctx.fillRect(w - 110, 10, 12, 12);
-        ctx.fillStyle = 'var(--text-secondary)';
+        ctx.fillStyle = '#8a8478';
         ctx.font = '11px "Noto Sans SC", sans-serif';
         ctx.textAlign = 'left';
         ctx.fillText(charName, w - 92, 18);
 
         ctx.fillStyle = 'rgba(79, 195, 247, 0.8)';
         ctx.fillRect(w - 110, 28, 12, 12);
-        ctx.fillStyle = 'var(--text-secondary)';
+        ctx.fillStyle = '#8a8478';
         ctx.fillText('你', w - 92, 36);
     }
 
@@ -521,19 +736,21 @@ class PersonalityQuiz {
         this.scores = { EI: 0, SN: 0, TF: 0, JP: 0, AC: 0, LD: 0, RC: 0, HM: 0 };
         this.answers = [];
         this.isAnimating = false;
+        this.focusedOption = -1;
 
+        this.clearSavedProgress();
         this.resultPage.classList.remove('active');
         this.landingPage.classList.add('active');
+
+        // Re-check if there's any saved progress (in case user came from continue)
+        this.continueBtn.style.display = 'none';
+        this.clearProgressWrap.style.display = 'none';
     }
 
     shareResult() {
         const { character, matchPercent } = this.findBestMatch();
         const typeLabels = this.getDimensionLabels();
-        const shareText = `我在原神角色人格测试中匹配到了「${character.name}」！匹配度${matchPercent}%
-${character.title}
-人格类型：${typeLabels}
-
-来测测你最像哪位原神角色吧！`;
+        const shareText = `我在原神角色人格测试中匹配到了「${character.name}」！匹配度${matchPercent}%\n${character.title}\n人格类型：${typeLabels}\n\n来测测你最像哪位原神角色吧！`;
 
         if (navigator.share) {
             navigator.share({
