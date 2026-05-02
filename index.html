@@ -309,6 +309,32 @@
     <!-- Toast 提示 -->
     <div id="toast" class="toast"></div>
 
+    <!-- 新手引导 -->
+    <div id="onboarding-overlay" class="onboarding-overlay" style="display:none;">
+        <div class="onboarding-box">
+            <div class="onboarding-title">✦ 欢迎来到提瓦特 ✦</div>
+            <div class="onboarding-steps">
+                <div class="onboarding-step">
+                    <span class="onboarding-step-icon">📝</span>
+                    <span class="onboarding-step-text"><strong>回答问题</strong>每道题选择最符合你的选项，共 64 道题</span>
+                </div>
+                <div class="onboarding-step">
+                    <span class="onboarding-step-icon">⬅️</span>
+                    <span class="onboarding-step-text"><strong>随时返回</strong>点击"上一题"或手机右滑可修改答案</span>
+                </div>
+                <div class="onboarding-step">
+                    <span class="onboarding-step-icon">🎵</span>
+                    <span class="onboarding-step-text"><strong>背景音乐</strong>点击左下角 🎵 播放环境音乐</span>
+                </div>
+                <div class="onboarding-step">
+                    <span class="onboarding-step-icon">💾</span>
+                    <span class="onboarding-step-text"><strong>自动保存</strong>进度自动保存，关闭后可继续</span>
+                </div>
+            </div>
+            <button id="onboarding-close" class="onboarding-close">开始旅程 ✦</button>
+        </div>
+    </div>
+
     <script src="js/i18n.js"></script>
     <script src="js/data.js"></script>
     <script src="js/quiz.js"></script>

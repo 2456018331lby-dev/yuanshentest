@@ -43,6 +43,9 @@ class PersonalityQuiz {
         this.bindEvents();
         this.checkSavedProgress();
         this.initTheme();
+        this.initMusicEngine();
+        this.initSwipeListeners();
+        this.checkOnboarding();
     }
 
     initElements() {
@@ -146,6 +149,34 @@ class PersonalityQuiz {
         // Music volume
         if (this.musicVolume) {
             this.musicVolume.addEventListener('input', (e) => {
+                this.musicVolumeValue = e.target.value / 100;
+                if (this.musicGain) this.musicGain.gain.value = this.musicVolumeValue;
+                if (this._customAudio) this._customAudio.volume = this.musicVolumeValue;
+                localStorage.setItem('genshinQuizVolume', e.target.value);
+            });
+        }
+        
+        // Music drag-and-drop
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (this.musicToggle) this.musicToggle.parentElement.classList.add('music-drop-active');
+        });
+        document.addEventListener('dragleave', () => {
+            if (this.musicToggle) this.musicToggle.parentElement.classList.remove('music-drop-active');
+        });
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (this.musicToggle) this.musicToggle.parentElement.classList.remove('music-drop-active');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('audio/')) this.loadMusicFile(file);
+        });
+        
+        // Music toggle
+        this.musicToggle.addEventListener('click', () => this.toggleMusic());
+        
+        // Music volume
+        if (this.musicVolume) {
+            this.musicVolume.addEventListener('input', (e) => {
                 this.bgmAudio.volume = e.target.value / 100;
                 localStorage.setItem('genshinQuizVolume', e.target.value);
             });
@@ -223,7 +254,7 @@ class PersonalityQuiz {
             if (this.isAnimating) return;
 
             switch (e.key) {
-                case '1': case '2': case '3': case '4': case '5': case '6': {
+case '1': case '2': case '3': case '4': case '5': case '6': {
                     const idx = parseInt(e.key) - 1;
                     const options = this.optionsContainer.querySelectorAll('.option');
                     if (options[idx] && !options[idx].classList.contains('disabled')) {
@@ -450,6 +481,229 @@ class PersonalityQuiz {
         }, 350);
     }
 
+    // ---- Music Player (Web Audio API Ambient) ----
+
+    initMusicEngine() {
+        this.audioCtx = null;
+        this.musicGain = null;
+        this.musicNodes = [];
+        this.musicPlaying = false;
+        this.musicVolumeValue = parseInt(localStorage.getItem('genshinQuizVolume') || '30') / 100;
+        this._musicChordInterval = null;
+        this._musicMelodyInterval = null;
+        this._customAudio = null;
+    }
+
+    toggleMusic() {
+        if (this.musicPlaying) this.pauseMusic();
+        else this.playMusic();
+    }
+
+    playMusic() {
+        try {
+            if (!this.audioCtx) {
+                this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                this.musicGain = this.audioCtx.createGain();
+                this.musicGain.gain.value = this.musicVolumeValue;
+                this.musicGain.connect(this.audioCtx.destination);
+            }
+            if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            this._startAmbientLoop();
+            this.musicPlaying = true;
+            this.musicToggle.classList.add('playing');
+            this.musicToggle.querySelector('.music-icon-on').style.display = '';
+            this.musicToggle.querySelector('.music-icon-off').style.display = 'none';
+            this.musicControls.style.display = 'flex';
+            localStorage.setItem('genshinQuizMusic', 'on');
+        } catch(e) {}
+    }
+
+    _startAmbientLoop() {
+        if (this.musicNodes.length > 0) return;
+        const padNotes = [
+            [261.6, 329.6, 392.0],
+            [293.7, 392.0, 440.0],
+            [329.6, 440.0, 523.3],
+            [392.0, 523.3, 587.3],
+        ];
+        const notes = [261.6, 293.7, 329.6, 392.0, 440.0, 523.3, 587.3, 659.3];
+        let chordIndex = 0;
+        
+        const playChord = () => {
+            if (!this.musicPlaying) return;
+            const chord = padNotes[chordIndex % padNotes.length];
+            chordIndex++;
+            chord.forEach(freq => {
+                const osc = this.audioCtx.createOscillator();
+                const gain = this.audioCtx.createGain();
+                const filter = this.audioCtx.createBiquadFilter();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                filter.type = 'lowpass';
+                filter.frequency.value = 800;
+                filter.Q.value = 0.5;
+                gain.gain.setValueAtTime(0, this.audioCtx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.06, this.audioCtx.currentTime + 2);
+                gain.gain.linearRampToValueAtTime(0.06, this.audioCtx.currentTime + 5);
+                gain.gain.linearRampToValueAtTime(0, this.audioCtx.currentTime + 8);
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.musicGain);
+                osc.start();
+                osc.stop(this.audioCtx.currentTime + 8.5);
+            });
+        };
+        
+        playChord();
+        this._musicChordInterval = setInterval(playChord, 7000);
+        
+        this._musicMelodyInterval = setInterval(() => {
+            if (!this.musicPlaying) return;
+            const freq = notes[Math.floor(Math.random() * notes.length)] * (Math.random() > 0.5 ? 1 : 0.5);
+            const osc = this.audioCtx.createOscillator();
+            const gain = this.audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0, this.audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.03, this.audioCtx.currentTime + 0.5);
+            gain.gain.linearRampToValueAtTime(0, this.audioCtx.currentTime + 3);
+            osc.connect(gain);
+            gain.connect(this.musicGain);
+            osc.start();
+            osc.stop(this.audioCtx.currentTime + 3.5);
+        }, 3000 + Math.random() * 2000);
+    }
+
+    pauseMusic() {
+        this.musicPlaying = false;
+        clearInterval(this._musicChordInterval);
+        clearInterval(this._musicMelodyInterval);
+        this._musicChordInterval = null;
+        this._musicMelodyInterval = null;
+        if (this._customAudio) { this._customAudio.pause(); this._customAudio = null; }
+        this.musicToggle.classList.remove('playing');
+        this.musicToggle.querySelector('.music-icon-on').style.display = 'none';
+        this.musicToggle.querySelector('.music-icon-off').style.display = '';
+        this.musicControls.style.display = 'none';
+        localStorage.setItem('genshinQuizMusic', 'off');
+    }
+
+    loadMusicFile(file) {
+        try {
+            if (!this.audioCtx) {
+                this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                this.musicGain = this.audioCtx.createGain();
+                this.musicGain.gain.value = this.musicVolumeValue;
+                this.musicGain.connect(this.audioCtx.destination);
+            }
+            if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+            this.pauseMusic();
+            const url = URL.createObjectURL(file);
+            const audio = new Audio(url);
+            audio.loop = true;
+            audio.volume = this.musicVolumeValue;
+            const source = this.audioCtx.createMediaElementSource(audio);
+            source.connect(this.musicGain);
+            audio.play();
+            this._customAudio = audio;
+            this.musicPlaying = true;
+            this.musicToggle.classList.add('playing');
+            this.musicToggle.querySelector('.music-icon-on').style.display = '';
+            this.musicToggle.querySelector('.music-icon-off').style.display = 'none';
+            this.musicControls.style.display = 'flex';
+            localStorage.setItem('genshinQuizMusic', 'on');
+        } catch(e) {}
+    }
+
+    initMusicFromStorage() {
+        const savedVolume = localStorage.getItem('genshinQuizVolume');
+        if (savedVolume && this.musicVolume) {
+            this.musicVolume.value = savedVolume;
+            this.musicVolumeValue = parseInt(savedVolume) / 100;
+        }
+        if (localStorage.getItem('genshinQuizMusic') === 'on') this.playMusic();
+    }
+
+    // ---- Swipe Navigation ----
+
+    initSwipeListeners() {
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchEndX = 0;
+        this.touchEndY = 0;
+        
+        const wrapper = document.getElementById('quiz-content-wrapper');
+        if (!wrapper) return;
+        
+        wrapper.addEventListener('touchstart', (e) => {
+            this.touchStartX = e.changedTouches[0].screenX;
+            this.touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+        
+        wrapper.addEventListener('touchend', (e) => {
+            this.touchEndX = e.changedTouches[0].screenX;
+            this.touchEndY = e.changedTouches[0].screenY;
+            this.handleSwipe();
+        }, { passive: true });
+    }
+
+    handleSwipe() {
+        if (this.isAnimating) return;
+        const dx = this.touchEndX - this.touchStartX;
+        const dy = this.touchEndY - this.touchStartY;
+        if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        
+        const qc = document.querySelector('#quiz-content-wrapper .quiz-content');
+        if (!qc) return;
+        
+        if (dx < 0 && this.answers[this.currentQuestion]) {
+            // Swipe left = next
+            qc.classList.add('slide-out-left');
+            setTimeout(() => {
+                qc.classList.remove('slide-out-left');
+                this.currentQuestion++;
+                if (this.currentQuestion < questions.length) {
+                    this.showQuestion();
+                    qc.classList.add('slide-in-right');
+                    requestAnimationFrame(() => requestAnimationFrame(() => {
+                        qc.classList.remove('slide-in-right');
+                    }));
+                } else {
+                    this.clearSavedProgress();
+                    this.disableExitWarning();
+                    this.showResult();
+                }
+            }, 300);
+        } else if (dx > 0) {
+            this.goToPreviousQuestion();
+        }
+    }
+
+    // ---- Progress Save/Restore ----
+
+    // ---- Onboarding ----
+
+    checkOnboarding() {
+        const shown = localStorage.getItem('genshinQuizOnboarded');
+        if (!shown) {
+            const overlay = document.getElementById('onboarding-overlay');
+            const closeBtn = document.getElementById('onboarding-close');
+            if (overlay && closeBtn) {
+                overlay.style.display = 'flex';
+                closeBtn.addEventListener('click', () => {
+                    overlay.style.display = 'none';
+                    localStorage.setItem('genshinQuizOnboarded', '1');
+                });
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) {
+                        overlay.style.display = 'none';
+                        localStorage.setItem('genshinQuizOnboarded', '1');
+                    }
+                });
+            }
+        }
+    }
+
     // ---- Progress Save/Restore ----
 
     checkSavedProgress() {
@@ -634,6 +888,7 @@ class PersonalityQuiz {
         this.resetTimer();
         this.startTimer();
         this.initMusicFromStorage();
+        this.initMusicFromStorage();
         this.showSkeleton();
         this.landingPage.classList.remove('active');
 
@@ -698,6 +953,7 @@ class PersonalityQuiz {
         this.updateProgressDots();
 
         // 更新选项 - use grid layout for 6 options
+        // 更新选项
         this.optionsContainer.innerHTML = '';
         this.optionsContainer.className = question.options.length > 4 ? 'options options-grid' : 'options';
         this.focusedOption = -1;
@@ -711,6 +967,16 @@ class PersonalityQuiz {
             button.addEventListener('click', () => this.selectOption(option, button, index));
             this.optionsContainer.appendChild(button);
         });
+        
+        // Swipe hint on mobile for first question
+        if (this.currentQuestion === 0 && window.innerWidth <= 768) {
+            const existing = document.querySelector('.swipe-hint');
+            if (existing) existing.remove();
+            const hint = document.createElement('div');
+            hint.className = 'swipe-hint';
+            hint.textContent = t('swipeHint') || '← 左滑下一题';
+            this.optionsContainer.after(hint);
+        }
         
         // Add swipe hint on mobile for first question
         if (this.currentQuestion === 0 && window.innerWidth <= 768) {
@@ -822,19 +1088,17 @@ class PersonalityQuiz {
     }
 
     transitionToNextQuestion() {
-        const quizContent = document.querySelector('#quiz-content-wrapper .quiz-content');
-        if (quizContent) {
-            quizContent.classList.add('slide-out-left');
+        const qc = document.querySelector('#quiz-content-wrapper .quiz-content');
+        if (qc) {
+            qc.classList.add('slide-out-left');
             setTimeout(() => {
-                quizContent.classList.remove('slide-out-left');
+                qc.classList.remove('slide-out-left');
                 this.showQuestion();
-                quizContent.classList.add('slide-in-right');
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        quizContent.classList.remove('slide-in-right');
-                        this.isAnimating = false;
-                    });
-                });
+                qc.classList.add('slide-in-right');
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    qc.classList.remove('slide-in-right');
+                    this.isAnimating = false;
+                }));
             }, 300);
         } else {
             const elements = [this.questionNumber, this.questionText, ...this.optionsContainer.children];
@@ -843,10 +1107,32 @@ class PersonalityQuiz {
                 el.style.opacity = '0';
                 el.style.transform = 'translateX(-20px)';
             });
+            setTimeout(() => { this.showQuestion(); this.isAnimating = false; }, 350);
+        }
+    }
+
+    transitionToPreviousQuestion() {
+        this.isAnimating = true;
+        const qc = document.querySelector('#quiz-content-wrapper .quiz-content');
+        if (qc) {
+            qc.classList.add('slide-in-right');
             setTimeout(() => {
+                qc.classList.remove('slide-in-right');
                 this.showQuestion();
-                this.isAnimating = false;
-            }, 350);
+                qc.classList.add('slide-out-left');
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    qc.classList.remove('slide-out-left');
+                    this.isAnimating = false;
+                }));
+            }, 300);
+        } else {
+            const elements = [this.questionNumber, this.questionText, ...this.optionsContainer.children];
+            elements.forEach((el, i) => {
+                el.style.transition = `all 0.3s ease ${i * 0.03}s`;
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(20px)';
+            });
+            setTimeout(() => { this.showQuestion(); this.isAnimating = false; }, 350);
         }
     }
 
