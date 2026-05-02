@@ -425,62 +425,6 @@ case '1': case '2': case '3': case '4': case '5': case '6': {
         };
     }
 
-    // ---- Swipe Navigation ----
-
-    handleSwipe() {
-        if (this.isAnimating) return;
-        const dx = this.touchEndX - this.touchStartX;
-        const dy = this.touchEndY - this.touchStartY;
-        const threshold = 60;
-        
-        // Only handle horizontal swipes that are clearly horizontal
-        if (Math.abs(dx) < threshold || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-        
-        const quizContent = document.querySelector('#quiz-content-wrapper .quiz-content');
-        if (!quizContent) return;
-        
-        if (dx < 0) {
-            // Swipe left = next question (only if answered)
-            if (this.answers[this.currentQuestion]) {
-                this.swipeToNext(quizContent);
-            }
-        } else {
-            // Swipe right = previous question
-            this.goToPreviousQuestion();
-        }
-    }
-
-    swipeToNext(quizContent) {
-        if (this.isAnimating) return;
-        this.isAnimating = true;
-        
-        quizContent.classList.add('slide-out-left');
-        
-        setTimeout(() => {
-            quizContent.classList.remove('slide-out-left');
-            this.currentQuestion++;
-            if (this.currentQuestion < questions.length) {
-                this.showQuestion();
-                quizContent.classList.add('slide-in-right');
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        quizContent.classList.remove('slide-in-right');
-                        quizContent.classList.add('slide-enter');
-                        setTimeout(() => {
-                            quizContent.classList.remove('slide-enter');
-                            this.isAnimating = false;
-                        }, 400);
-                    });
-                });
-            } else {
-                this.clearSavedProgress();
-                this.disableExitWarning();
-                this.showResult();
-                this.isAnimating = false;
-            }
-        }, 350);
-    }
-
     // ---- Music Player (Web Audio API Ambient) ----
 
     initMusicEngine() {
@@ -1352,6 +1296,11 @@ case '1': case '2': case '3': case '4': case '5': case '6': {
                     date: new Date().toISOString()
                 }));
             } catch (e) {}
+
+            // 保存到历史记录
+            this.saveToHistory(character.name, matchPercent, userRadar);
+            this.renderHistory();
+            this.renderZodiac();
         }
 
         this.isAnimating = false;
@@ -2002,14 +1951,89 @@ case '1': case '2': case '3': case '4': case '5': case '6': {
         } catch (e) {}
     }
 
+    // ---- History ----
+
+    saveToHistory(characterName, matchPercent, radar) {
+        try {
+            const history = JSON.parse(localStorage.getItem('genshinQuizHistory') || '[]');
+            history.push({ character: characterName, matchPercent, radar, date: new Date().toISOString() });
+            if (history.length > 10) history.splice(0, history.length - 10);
+            localStorage.setItem('genshinQuizHistory', JSON.stringify(history));
+        } catch(e) {}
+    }
+
+    getHistory() {
+        try { return JSON.parse(localStorage.getItem('genshinQuizHistory') || '[]'); }
+        catch(e) { return []; }
+    }
+
+    renderHistory() {
+        const section = document.getElementById('history-section');
+        const content = document.getElementById('history-content');
+        if (!section || !content) return;
+        const history = this.getHistory();
+        if (history.length < 2) return;
+        section.style.display = '';
+        const items = history.slice(-5).reverse().map(h => {
+            const d = new Date(h.date);
+            const ds = `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
+            return `<div class="history-item"><span class="history-date">${ds}</span><span class="history-char">${h.character}</span><span class="history-match">${h.matchPercent}%</span></div>`;
+        }).join('');
+        content.innerHTML = items;
+    }
+
+    // ---- Friend Comparison ----
+
+    generateResultId() {
+        const { character, matchPercent, userRadar } = this.findBestMatch();
+        const dims = ['EI','SN','TF','JP','AC','LD','RC','HM'];
+        const data = dims.map(d => userRadar[d]).join(',');
+        return { id: btoa(character.name + '|' + matchPercent + '|' + data).substring(0, 12), character, matchPercent, userRadar };
+    }
+
+    // ---- Zodiac Easter Egg ----
+
+    getZodiac(month, day) {
+        const signs = [[1,20,'水瓶座','♒'],[2,19,'双鱼座','♓'],[3,21,'白羊座','♈'],[4,20,'金牛座','♉'],[5,21,'双子座','♊'],[6,22,'巨蟹座','♋'],[7,23,'狮子座','♌'],[8,23,'处女座','♍'],[9,23,'天秤座','♎'],[10,23,'天蝎座','♏'],[11,22,'射手座','♐'],[12,22,'摩羯座','♑']];
+        for (const [m, d, name, icon] of signs) { if (month === m && day <= d) return { name, icon }; }
+        return { name: '摩羯座', icon: '♑' };
+    }
+
+    getChineseZodiac(year) {
+        return ['鼠','牛','虎','兔','龙','蛇','马','羊','猴','鸡','狗','猪'][(year - 4) % 12];
+    }
+
+    renderZodiac() {
+        const section = document.getElementById('zodiac-section');
+        const content = document.getElementById('zodiac-content');
+        if (!section || !content) return;
+        const birthday = localStorage.getItem('genshinQuizBirthday');
+        let month, day, year;
+        if (birthday) {
+            [year, month, day] = birthday.split('-').map(Number);
+        } else {
+            const input = prompt(t('birthdayPrompt') || '输入你的生日（YYYY-MM-DD）查看星座彩蛋：');
+            if (!input) return;
+            const parts = input.split(/[-\/]/).map(Number);
+            if (parts.length < 3 || parts.some(isNaN)) return;
+            [year, month, day] = parts;
+            localStorage.setItem('genshinQuizBirthday', `${year}-${month}-${day}`);
+        }
+        const zodiac = this.getZodiac(month, day);
+        const animal = this.getChineseZodiac(year);
+        section.style.display = '';
+        content.innerHTML = `<div style="text-align:center;"><span style="font-size:2.5rem;">${zodiac.icon}</span><p style="color:var(--gold-primary);font-size:1.1rem;font-weight:600;margin:8px 0;">${zodiac.name} · ${animal}</p><p style="color:var(--text-secondary);font-size:0.85rem;">${year}年${month}月${day}日</p></div>`;
+    }
+
+    // ---- Toast ----
+
     showToast(message) {
         this.toast.textContent = message;
         this.toast.classList.add('show');
-        setTimeout(() => {
-            this.toast.classList.remove('show');
-        }, 2500);
+        setTimeout(() => { this.toast.classList.remove('show'); }, 2500);
     }
 }
+
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {

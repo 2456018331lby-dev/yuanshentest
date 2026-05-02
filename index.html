@@ -15,6 +15,7 @@
     <meta name="twitter:description" content="8维度64题，精准匹配32位原神角色，发现你最像谁！">
     <meta name="twitter:image" content="images/share-preview.png">
     <meta name="theme-color" content="#0c0c14">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="canonical" href="https://yuanshentest.vercel.app/">
     <link rel="sitemap" type="application/xml" href="sitemap.xml">
     <!-- 字体 -->
@@ -257,10 +258,31 @@
                     <div id="avoid-block" class="avoid-block"></div>
                 </div>
 
+                <!-- 星座彩蛋 -->
+                <div id="zodiac-section" class="result-section ornate-border" style="display:none;">
+                    <span class="corner corner-tl"></span>
+                    <span class="corner corner-tr"></span>
+                    <span class="corner corner-bl"></span>
+                    <span class="corner corner-br"></span>
+                    <h3 class="section-title">星座彩蛋</h3>
+                    <div id="zodiac-content" class="zodiac-content"></div>
+                </div>
+
+                <!-- 历史记录 -->
+                <div id="history-section" class="result-section ornate-border" style="display:none;">
+                    <span class="corner corner-tl"></span>
+                    <span class="corner corner-tr"></span>
+                    <span class="corner corner-bl"></span>
+                    <span class="corner corner-br"></span>
+                    <h3 class="section-title">测试历史</h3>
+                    <div id="history-content" class="history-content"></div>
+                </div>
+
                 <div class="result-actions">
                     <button id="restart-btn" class="btn-primary">重新测试</button>
                     <button id="share-btn" class="btn-secondary">分享结果</button>
                     <button id="share-image-btn" class="btn-secondary">生成分享图</button>
+                    <button id="show-id-btn" class="btn-secondary" style="display:none;">对比好友</button>
                 </div>
             </div>
         </section>

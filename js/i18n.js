@@ -34,6 +34,17 @@ const translations = {
     soundOn: "音效已开启",
     soundOff: "音效已关闭",
     musicNotFound: "请拖拽音频文件到🎵按钮上",
+    friendIdPrompt: "输入好友的结果ID进行对比：",
+    birthdayPrompt: "输入你的生日（YYYY-MM-DD）查看星座彩蛋：",
+    samePerson: "这是你自己的结果！",
+    friendResult: "好友匹配",
+    invalidId: "ID格式不正确",
+    swipeHint: "← 左滑下一题",
+    friendIdPrompt: "输入好友的结果ID进行对比：",
+    birthdayPrompt: "输入你的生日（YYYY-MM-DD）查看星座彩蛋：",
+    samePerson: "这是你自己的结果！",
+    friendResult: "好友匹配",
+    invalidId: "ID格式不正确",
     swipeHint: "← 左滑下一题", 
 
     // Result page
