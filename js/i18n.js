@@ -33,6 +33,8 @@ const translations = {
     teyvatJourney: "提瓦特之旅",
     soundOn: "音效已开启",
     soundOff: "音效已关闭",
+    musicNotFound: "请拖拽音频文件到🎵按钮上",
+    swipeHint: "← 左滑下一题", 
 
     // Result page
     resultTitle: "✦ 你的测试结果 ✦",

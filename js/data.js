@@ -7,10 +7,12 @@ const questions = [
     dimension: "EI",
     question: "你在蒙德酒馆「天使的馈赠」里会怎么做？",
     options: [
-      { text: "主动和陌生人搭话，很快就和整桌人打成一片", score: 2 },
+      { text: "主动和陌生人搭话，很快就和整桌人打成一片", score: 3 },
+      { text: "跟着朋友一起进入酒馆，观察一阵后自然加入对话", score: 2 },
       { text: "和吧台边的熟人聊天，气氛轻松愉快", score: 1 },
       { text: "找个角落的位置，安静地品尝饮品", score: -1 },
-      { text: "点完单就离开，人多的地方让你不自在", score: -2 }
+      { text: "坐在角落写旅行日记，偶尔抬头看看热闹的人群", score: -2 },
+      { text: "点完单就离开，人多的地方让你不自在", score: -3 }
     ]
   },
   {
@@ -18,10 +20,12 @@ const questions = [
     dimension: "EI",
     question: "冒险家协会派你和一个陌生冒险者组队，你的第一反应是？",
     options: [
-      { text: "太好了！新伙伴意味着新故事", score: 2 },
+      { text: "太好了！新伙伴意味着新故事", score: 3 },
+      { text: "有些期待，毕竟能学到新的战斗技巧", score: 2 },
       { text: "没问题，合作完成任务就好", score: 1 },
       { text: "有点紧张，但会尽力配合", score: -1 },
-      { text: "希望尽快结束，独自行动更自在", score: -2 }
+      { text: "尽量减少交流，专注完成任务就好", score: -2 },
+      { text: "希望尽快结束，独自行动更自在", score: -3 }
     ]
   },
   {
@@ -29,10 +33,12 @@ const questions = [
     dimension: "EI",
     question: "在璃月的宴会上，你被邀请上台发言，你会？",
     options: [
-      { text: "欣然上台，妙语连珠引得满堂喝彩", score: 2 },
+      { text: "欣然上台，妙语连珠引得满堂喝彩", score: 3 },
+      { text: "接受邀请，讲几句简短但真诚的话", score: 2 },
       { text: "简单致辞，然后自然地融入人群", score: 1 },
       { text: "勉强上台，说完就匆匆下来", score: -1 },
-      { text: "找借口推脱，在台下默默旁观", score: -2 }
+      { text: "站在人群边缘，希望没人注意到自己", score: -2 },
+      { text: "找借口推脱，在台下默默旁观", score: -3 }
     ]
   },
   {
@@ -40,10 +46,12 @@ const questions = [
     dimension: "EI",
     question: "经过一整天的社交活动后，你感觉如何？",
     options: [
-      { text: "意犹未尽，还想继续参加下一场聚会", score: 2 },
+      { text: "意犹未尽，还想继续参加下一场聚会", score: 3 },
+      { text: "感觉满足，但确实需要休息一下", score: 2 },
       { text: "虽然有点累，但心情很愉快", score: 1 },
       { text: "精疲力竭，需要一些独处时间恢复", score: -1 },
-      { text: "完全透支，只想立刻回到房间关上门", score: -2 }
+      { text: "需要较长的恢复期，最好明天不要安排社交", score: -2 },
+      { text: "完全透支，只想立刻回到房间关上门", score: -3 }
     ]
   },
   {
@@ -51,10 +59,12 @@ const questions = [
     dimension: "EI",
     question: "在须弥的学术研讨会上，你有一个大胆的想法，你会？",
     options: [
-      { text: "立刻举手发言，与大家分享你的观点", score: 2 },
+      { text: "立刻举手发言，与大家分享你的观点", score: 3 },
+      { text: "鼓起勇气，在讨论环节中小声提出", score: 2 },
       { text: "等合适时机，向身边的人小声讨论", score: 1 },
       { text: "先写下来，会后再单独找学者交流", score: -1 },
-      { text: "只在心里想想，不想引起注意", score: -2 }
+      { text: "在笔记本上画满了想法的草图，但始终没有开口", score: -2 },
+      { text: "只在心里想想，不想引起注意", score: -3 }
     ]
   },
   {
@@ -62,10 +72,12 @@ const questions = [
     dimension: "EI",
     question: "你更喜欢哪种度过周末的方式？",
     options: [
-      { text: "召集朋友们一起探险或举办派对", score: 2 },
+      { text: "召集朋友们一起探险或举办派对", score: 3 },
+      { text: "约三五好友去蒙德城外野餐，人数刚好", score: 2 },
       { text: "和一两个好友去城里逛逛", score: 1 },
       { text: "在家看书或做手工，偶尔回复朋友消息", score: -1 },
-      { text: "完全独处，沉浸在自己的世界里", score: -2 }
+      { text: "独自在望风山地散步，享受无人打扰的宁静", score: -2 },
+      { text: "完全独处，沉浸在自己的世界里", score: -3 }
     ]
   },
   {
@@ -73,10 +85,12 @@ const questions = [
     dimension: "EI",
     question: "一个陌生人主动向你搭话，你的反应是？",
     options: [
-      { text: "热情回应，很快聊得热火朝天", score: 2 },
+      { text: "热情回应，很快聊得热火朝天", score: 3 },
+      { text: "友善地微笑回应，简短聊几句天气", score: 2 },
       { text: "礼貌回应，视情况决定是否深聊", score: 1 },
       { text: "简短回答，希望对话尽快结束", score: -1 },
-      { text: "感到不自在，找借口离开", score: -2 }
+      { text: "心里希望对方快点走开，表面保持礼貌", score: -2 },
+      { text: "感到不自在，找借口离开", score: -3 }
     ]
   },
   {
@@ -84,10 +98,12 @@ const questions = [
     dimension: "EI",
     question: "在稻妻的祭典上，你会选择？",
     options: [
-      { text: "穿梭在人群中，体验所有摊位和活动", score: 2 },
+      { text: "穿梭在人群中，体验所有摊位和活动", score: 3 },
+      { text: "和朋友一起逛，边走边品尝小吃", score: 2 },
       { text: "挑选几个感兴趣的项目参与", score: 1 },
       { text: "站在远处欣赏烟花和人群", score: -1 },
-      { text: "找一个安静的地方看烟花，避开人群", score: -2 }
+      { text: "独自找个高处，默默欣赏祭典的灯火", score: -2 },
+      { text: "找一个安静的地方看烟花，避开人群", score: -3 }
     ]
   },
 
@@ -97,10 +113,12 @@ const questions = [
     dimension: "SN",
     question: "看到一片从未踏足的森林，你首先注意到的是？",
     options: [
-      { text: "树木的种类、地形和可采集的果实", score: 2 },
+      { text: "树木的种类、地形和可采集的果实", score: 3 },
+      { text: "风中传来的花香和小动物的活动痕迹", score: 2 },
       { text: "路况是否安全、哪里适合扎营", score: 1 },
       { text: "这片森林隐藏着什么古老的秘密", score: -1 },
-      { text: "仿佛看到了精灵在林间起舞的幻象", score: -2 }
+      { text: "这片森林是否连接着某个失落的文明遗迹", score: -2 },
+      { text: "仿佛看到了精灵在林间起舞的幻象", score: -3 }
     ]
   },
   {
@@ -108,10 +126,12 @@ const questions = [
     dimension: "SN",
     question: "你更相信以下哪种判断方式？",
     options: [
-      { text: "亲眼所见、亲手验证的事实", score: 2 },
+      { text: "亲眼所见、亲手验证的事实", score: 3 },
+      { text: "多数人的共识和反复验证过的知识", score: 2 },
       { text: "经验和常识告诉我的结论", score: 1 },
       { text: "内心隐约的预感或灵感", score: -1 },
-      { text: "梦境或象征中传达的启示", score: -2 }
+      { text: "一种说不清的第六感，好像有什么在指引我", score: -2 },
+      { text: "梦境或象征中传达的启示", score: -3 }
     ]
   },
   {
@@ -119,10 +139,12 @@ const questions = [
     dimension: "SN",
     question: "描述你手中的武器时，你会说？",
     options: [
-      { text: "它的重量、材质和锻造工艺", score: 2 },
+      { text: "它的重量、材质和锻造工艺", score: 3 },
+      { text: "它在实战中的可靠表现和手感", score: 2 },
       { text: "它的攻击力和实用性", score: 1 },
       { text: "它承载的历史和传说", score: -1 },
-      { text: "它仿佛在呼唤着某个未知的命运", score: -2 }
+      { text: "它与使用者之间似乎存在某种奇妙的羁绊", score: -2 },
+      { text: "它仿佛在呼唤着某个未知的命运", score: -3 }
     ]
   },
   {
@@ -130,10 +152,12 @@ const questions = [
     dimension: "SN",
     question: "面对一个复杂的古代机关，你会如何破解？",
     options: [
-      { text: "仔细观察机关结构，寻找物理规律", score: 2 },
+      { text: "仔细观察机关结构，寻找物理规律", score: 3 },
+      { text: "逐一测试每个部件的功能，排除法破解", score: 2 },
       { text: "参考已有的解密经验和图纸", score: 1 },
       { text: "感受机关中流动的元素能量走向", score: -1 },
-      { text: "相信直觉，尝试一些非常规的方法", score: -2 }
+      { text: "闭上眼睛感受机关中隐含的意图和韵律", score: -2 },
+      { text: "相信直觉，尝试一些非常规的方法", score: -3 }
     ]
   },
   {
@@ -141,10 +165,12 @@ const questions = [
     dimension: "SN",
     question: "你更喜欢哪种冒险故事？",
     options: [
-      { text: "详细记录探险过程和真实见闻", score: 2 },
+      { text: "详细记录探险过程和真实见闻", score: 3 },
+      { text: "展示不同风土人情和自然景观的游记", score: 2 },
       { text: "充满实用技巧和生存智慧的故事", score: 1 },
       { text: "揭示世界隐藏真相的神秘传说", score: -1 },
-      { text: "充满象征意义和哲学思考的诗篇", score: -2 }
+      { text: "探讨生命意义和星辰奥秘的寓言故事", score: -2 },
+      { text: "充满象征意义和哲学思考的诗篇", score: -3 }
     ]
   },
   {
@@ -152,10 +178,12 @@ const questions = [
     dimension: "SN",
     question: "在须弥的图书馆里，你被什么吸引？",
     options: [
-      { text: "精确的地图、详细的植物图鉴", score: 2 },
+      { text: "精确的地图、详细的植物图鉴", score: 3 },
+      { text: "各国的地理志和博物学著作", score: 2 },
       { text: "实用的炼金配方和元素理论", score: 1 },
       { text: "关于世界树和古代文明的禁书", score: -1 },
-      { text: "那些连学者都无法解读的神秘文字", score: -2 }
+      { text: "记载着梦境与现实交织的古老神话集", score: -2 },
+      { text: "那些连学者都无法解读的神秘文字", score: -3 }
     ]
   },
   {
@@ -163,10 +191,12 @@ const questions = [
     dimension: "SN",
     question: "朋友问你明天天气如何，你会？",
     options: [
-      { text: "查看风向标和云层状况来判断", score: 2 },
+      { text: "查看风向标和云层状况来判断", score: 3 },
+      { text: "综合观察温度、湿度和风力来推断", score: 2 },
       { text: "根据季节和往年经验推测", score: 1 },
       { text: "说感觉明天会是个特别的日子", score: -1 },
-      { text: "开玩笑说星辰已经告诉我答案了", score: -2 }
+      { text: "凭一种奇妙的直觉，每次说的还挺准", score: -2 },
+      { text: "开玩笑说星辰已经告诉我答案了", score: -3 }
     ]
   },
   {
@@ -174,10 +204,12 @@ const questions = [
     dimension: "SN",
     question: "你如何看待「神之眼」的获得？",
     options: [
-      { text: "是强烈愿望被神明认可的具体证明", score: 2 },
+      { text: "是强烈愿望被神明认可的具体证明", score: 3 },
+      { text: "是坚持不懈的信念和日积月累的结果", score: 2 },
       { text: "是努力和资质达到标准的结果", score: 1 },
       { text: "是命运之网中某个节点的显现", score: -1 },
-      { text: "是灵魂与世界深层共鸣的奇迹", score: -2 }
+      { text: "是灵魂深处某种不可言说的呼唤", score: -2 },
+      { text: "是灵魂与世界深层共鸣的奇迹", score: -3 }
     ]
   },
 
@@ -187,10 +219,12 @@ const questions = [
     dimension: "TF",
     question: "你的队友在战斗中犯了严重错误，导致任务失败，你会？",
     options: [
-      { text: "直接指出问题所在，分析失败原因", score: 2 },
+      { text: "直接指出问题所在，分析失败原因", score: 3 },
+      { text: "肯定他的优点，同时客观指出需要改进的地方", score: 2 },
       { text: "复盘战术，讨论如何改进配合", score: 1 },
       { text: "先安慰队友，再委婉地提出建议", score: -1 },
-      { text: "说没关系，重要的是大家都平安", score: -2 }
+      { text: "拍拍他的肩膀，告诉他下次一定会更好", score: -2 },
+      { text: "说没关系，重要的是大家都平安", score: -3 }
     ]
   },
   {
@@ -198,10 +232,12 @@ const questions = [
     dimension: "TF",
     question: "两个朋友发生争执来找你评理，你会？",
     options: [
-      { text: "客观分析谁更有道理，指出对错", score: 2 },
+      { text: "客观分析谁更有道理，指出对错", score: 3 },
+      { text: "分别和两人谈心，理解各自的立场后再做判断", score: 2 },
       { text: "梳理事情经过，找出问题的根源", score: 1 },
       { text: "先倾听双方感受，希望大家和解", score: -1 },
-      { text: "不管谁对谁错，友谊最重要", score: -2 }
+      { text: "提议大家一起喝杯茶，等情绪平复后再讨论", score: -2 },
+      { text: "不管谁对谁错，友谊最重要", score: -3 }
     ]
   },
   {
@@ -209,10 +245,12 @@ const questions = [
     dimension: "TF",
     question: "在做重要决定时，你更依赖？",
     options: [
-      { text: "逻辑分析和利弊权衡", score: 2 },
+      { text: "逻辑分析和利弊权衡", score: 3 },
+      { text: "综合考虑各方面因素后做出平衡的选择", score: 2 },
       { text: "客观数据和可靠证据", score: 1 },
       { text: "内心的价值观和感受", score: -1 },
-      { text: "这个决定对他人情感的影响", score: -2 }
+      { text: "倾听内心的声音，选择让自己不后悔的方向", score: -2 },
+      { text: "这个决定对他人情感的影响", score: -3 }
     ]
   },
   {
@@ -220,10 +258,12 @@ const questions = [
     dimension: "TF",
     question: "有人评价你的方案「太冷酷」，你的反应是？",
     options: [
-      { text: "效率优先，情感不能影响正确决策", score: 2 },
+      { text: "效率优先，情感不能影响正确决策", score: 3 },
+      { text: "接受反馈，在保持原则的同时调整表达方式", score: 2 },
       { text: "询问具体哪里有问题，理性讨论", score: 1 },
       { text: "反思是否忽略了人的感受", score: -1 },
-      { text: "感到受伤，重新考虑更温和的方案", score: -2 }
+      { text: "认真思考对方的感受，努力寻找更温暖的措辞", score: -2 },
+      { text: "感到受伤，重新考虑更温和的方案", score: -3 }
     ]
   },
   {
@@ -231,10 +271,12 @@ const questions = [
     dimension: "TF",
     question: "面对一个需要牺牲少数人拯救多数人的抉择，你会？",
     options: [
-      { text: "计算最大利益，做出最理性的选择", score: 2 },
+      { text: "计算最大利益，做出最理性的选择", score: 3 },
+      { text: "权衡利弊，但会想尽办法减少任何牺牲", score: 2 },
       { text: "寻找是否有两全其美的方案", score: 1 },
       { text: "无法轻易决定，每个人的生命都珍贵", score: -1 },
-      { text: "宁愿自己承担代价，也不想牺牲任何人", score: -2 }
+      { text: "拖延决定，希望时间能带来转机", score: -2 },
+      { text: "宁愿自己承担代价，也不想牺牲任何人", score: -3 }
     ]
   },
   {
@@ -242,10 +284,12 @@ const questions = [
     dimension: "TF",
     question: "评价一个陌生人时，你首先注意到的是？",
     options: [
-      { text: "他的能力和做事方式", score: 2 },
+      { text: "他的能力和做事方式", score: 3 },
+      { text: "他的价值观和行事原则", score: 2 },
       { text: "他的言行是否合乎逻辑", score: 1 },
       { text: "他给人的感觉是否真诚友善", score: -1 },
-      { text: "他的情感状态和内心世界", score: -2 }
+      { text: "他对待弱者时流露出的不经意的善意", score: -2 },
+      { text: "他的情感状态和内心世界", score: -3 }
     ]
   },
   {
@@ -253,10 +297,12 @@ const questions = [
     dimension: "TF",
     question: "你的建议被朋友拒绝，你会？",
     options: [
-      { text: "解释为什么我的建议更合理", score: 2 },
+      { text: "解释为什么我的建议更合理", score: 3 },
+      { text: "虽然不认同，但尊重他的决定并继续支持", score: 2 },
       { text: "分析他的方案有哪些潜在问题", score: 1 },
       { text: "尊重他的选择，支持他的决定", score: -1 },
-      { text: "有点失落，但不想影响关系", score: -2 }
+      { text: "担心他的选择会受伤，默默关注后续情况", score: -2 },
+      { text: "有点失落，但不想影响关系", score: -3 }
     ]
   },
   {
@@ -264,10 +310,12 @@ const questions = [
     dimension: "TF",
     question: "在团队中，你更在意的是？",
     options: [
-      { text: "任务是否高效、完美地完成", score: 2 },
+      { text: "任务是否高效、完美地完成", score: 3 },
+      { text: "既完成任务又保持团队的协作氛围", score: 2 },
       { text: "目标是否达成，结果是否理想", score: 1 },
       { text: "团队成员是否和谐、开心", score: -1 },
-      { text: "每个人是否都被理解和接纳", score: -2 }
+      { text: "大家是否都发挥了自己的长处和价值", score: -2 },
+      { text: "每个人是否都被理解和接纳", score: -3 }
     ]
   },
 
@@ -277,10 +325,12 @@ const questions = [
     dimension: "JP",
     question: "计划一次长途探险，你会？",
     options: [
-      { text: "提前规划好每一天的行程和补给点", score: 2 },
+      { text: "提前规划好每一天的行程和补给点", score: 3 },
+      { text: "准备好应急预案，但允许途中适当调整", score: 2 },
       { text: "制定大致路线，准备充足的物资", score: 1 },
       { text: "确定目的地，路上随机应变", score: -1 },
-      { text: "说走就走，未知的旅途才有趣", score: -2 }
+      { text: "确定方向就出发，路上再根据情况决定", score: -2 },
+      { text: "说走就走，未知的旅途才有趣", score: -3 }
     ]
   },
   {
@@ -288,10 +338,12 @@ const questions = [
     dimension: "JP",
     question: "你的房间通常是什么状态？",
     options: [
-      { text: "井井有条，每件物品都有固定位置", score: 2 },
+      { text: "井井有条，每件物品都有固定位置", score: 3 },
+      { text: "常用物品摆放整齐，偶尔需要整理", score: 2 },
       { text: "大致整洁，能快速找到需要的东西", score: 1 },
       { text: "有点乱，但乱中有序，我知道东西在哪", score: -1 },
-      { text: "随心所欲，整洁反而会让我找不到东西", score: -2 }
+      { text: "散落各处但形成一种独特的「生态平衡」", score: -2 },
+      { text: "随心所欲，整洁反而会让我找不到东西", score: -3 }
     ]
   },
   {
@@ -299,10 +351,12 @@ const questions = [
     dimension: "JP",
     question: "面对截止日期，你通常？",
     options: [
-      { text: "提前完成，留出时间检查和优化", score: 2 },
+      { text: "提前完成，留出时间检查和优化", score: 3 },
+      { text: "设定阶段性目标，偶尔需要加把劲追赶", score: 2 },
       { text: "按计划稳步推进，准时交付", score: 1 },
       { text: "最后关头冲刺，压力下效率更高", score: -1 },
-      { text: "经常延期，但总能想出办法解决", score: -2 }
+      { text: "拖到最后才开始，但总能在deadline前搞定", score: -2 },
+      { text: "经常延期，但总能想出办法解决", score: -3 }
     ]
   },
   {
@@ -310,10 +364,12 @@ const questions = [
     dimension: "JP",
     question: "你更喜欢哪种生活方式？",
     options: [
-      { text: "有规律、可预期的稳定日常", score: 2 },
+      { text: "有规律、可预期的稳定日常", score: 3 },
+      { text: "有大致框架，但每天都有灵活调整的空间", score: 2 },
       { text: "有计划但允许小幅调整的弹性安排", score: 1 },
       { text: "充满变化和惊喜的每一天", score: -1 },
-      { text: "完全自由，不受任何约束", score: -2 }
+      { text: "没有固定安排，跟着灵感和心情走", score: -2 },
+      { text: "完全自由，不受任何约束", score: -3 }
     ]
   },
   {
@@ -321,10 +377,12 @@ const questions = [
     dimension: "JP",
     question: "接到一个新任务，你会？",
     options: [
-      { text: "立刻拆解步骤，制定详细执行计划", score: 2 },
+      { text: "立刻拆解步骤，制定详细执行计划", score: 3 },
+      { text: "列出关键步骤，边做边根据反馈调整", score: 2 },
       { text: "先了解目标和要求，再开始行动", score: 1 },
       { text: "边做边看，在实践中找到最佳方法", score: -1 },
-      { text: "先放一放，等有灵感了再一口气完成", score: -2 }
+      { text: "大致想想方向就动手，边干边摸索", score: -2 },
+      { text: "先放一放，等有灵感了再一口气完成", score: -3 }
     ]
   },
   {
@@ -332,10 +390,12 @@ const questions = [
     dimension: "JP",
     question: "旅行时你的背包里？",
     options: [
-      { text: "分类整理好，为各种情况做好准备", score: 2 },
+      { text: "分类整理好，为各种情况做好准备", score: 3 },
+      { text: "带上可能用到的物品，留一些空间给意外收获", score: 2 },
       { text: "必需品齐全，但不过度携带", score: 1 },
       { text: "只带最基础的，缺什么路上再买", score: -1 },
-      { text: "随便塞几件，到了再说", score: -2 }
+      { text: "背包里一半是食物一半是捡来的奇怪石头", score: -2 },
+      { text: "随便塞几件，到了再说", score: -3 }
     ]
   },
   {
@@ -343,10 +403,12 @@ const questions = [
     dimension: "JP",
     question: "面对突发状况改变原有计划，你会？",
     options: [
-      { text: "有些焦虑，但会快速调整新计划", score: 2 },
+      { text: "有些焦虑，但会快速调整新计划", score: 3 },
+      { text: "有些不适，但能较快适应新情况", score: 2 },
       { text: "评估影响，重新安排优先级", score: 1 },
       { text: "顺其自然，变化也是旅程的一部分", score: -1 },
-      { text: "太好了，正觉得原计划太无聊", score: -2 }
+      { text: "暗自高兴，计划之外的事往往更有趣", score: -2 },
+      { text: "太好了，正觉得原计划太无聊", score: -3 }
     ]
   },
   {
@@ -354,10 +416,12 @@ const questions = [
     dimension: "JP",
     question: "你如何看待规则和制度？",
     options: [
-      { text: "必要的秩序保障，应当严格遵守", score: 2 },
+      { text: "必要的秩序保障，应当严格遵守", score: 3 },
+      { text: "大部分规则有其道理，但不合理的应该改", score: 2 },
       { text: "大多数情况下应该遵循", score: 1 },
       { text: "视情况而定，灵活处理", score: -1 },
-      { text: "束缚人的枷锁，该打破时就打破", score: -2 }
+      { text: "能遵守就遵守，不方便时灵活变通也无妨", score: -2 },
+      { text: "束缚人的枷锁，该打破时就打破", score: -3 }
     ]
   },
 
@@ -367,10 +431,12 @@ const questions = [
     dimension: "AC",
     question: "发现一条标注「极度危险」的捷径，你会？",
     options: [
-      { text: "毫不犹豫走捷径，刺激才有收获", score: 2 },
+      { text: "毫不犹豫走捷径，刺激才有收获", score: 3 },
+      { text: "查看路径情况，选择一条相对安全的路段尝试", score: 2 },
       { text: "评估风险后，大概率会选择尝试", score: 1 },
       { text: "除非万不得已，否则走安全路线", score: -1 },
-      { text: "坚决走大路，安全永远是第一位", score: -2 }
+      { text: "宁可多花时间走大路，也不想冒不必要的险", score: -2 },
+      { text: "坚决走大路，安全永远是第一位", score: -3 }
     ]
   },
   {
@@ -378,10 +444,12 @@ const questions = [
     dimension: "AC",
     question: "面对一个未知的古代遗迹，你会？",
     options: [
-      { text: "立刻冲进去探索，先到先得", score: 2 },
+      { text: "立刻冲进去探索，先到先得", score: 3 },
+      { text: "在入口处观察一段时间后小心进入", score: 2 },
       { text: "简单观察后就进入，犹豫会错失良机", score: 1 },
       { text: "仔细勘察后再决定是否进入", score: -1 },
-      { text: "做好万全准备，甚至等专家来一起", score: -2 }
+      { text: "先在外围搜索线索，确认没有明显危险再靠近", score: -2 },
+      { text: "做好万全准备，甚至等专家来一起", score: -3 }
     ]
   },
   {
@@ -389,10 +457,12 @@ const questions = [
     dimension: "AC",
     question: "在战斗中，你更倾向于？",
     options: [
-      { text: "主动出击，以攻为守", score: 2 },
+      { text: "主动出击，以攻为守", score: 3 },
+      { text: "伺机而动，抓住敌人的弱点进攻", score: 2 },
       { text: "寻找机会，打敌人一个措手不及", score: 1 },
       { text: "稳扎稳打，先确保自身安全", score: -1 },
-      { text: "以守为攻，等敌人露出破绽", score: -2 }
+      { text: "先布好阵型，确保万无一失再出击", score: -2 },
+      { text: "以守为攻，等敌人露出破绽", score: -3 }
     ]
   },
   {
@@ -400,10 +470,12 @@ const questions = [
     dimension: "AC",
     question: "有人邀请你投资一个高回报但高风险的项目，你会？",
     options: [
-      { text: "孤注一掷，高风险才有高回报", score: 2 },
+      { text: "孤注一掷，高风险才有高回报", score: 3 },
+      { text: "详细了解项目背景后做决定", score: 2 },
       { text: "投入一部分，即使亏了也能承受", score: 1 },
       { text: "小额试水，确认可靠再追加", score: -1 },
-      { text: "婉言谢绝，不做没把握的事", score: -2 }
+      { text: "先观望一段时间，看看别人的投入效果", score: -2 },
+      { text: "婉言谢绝，不做没把握的事", score: -3 }
     ]
   },
   {
@@ -411,10 +483,12 @@ const questions = [
     dimension: "AC",
     question: "在悬崖边发现一朵传说中的稀有花朵，你会？",
     options: [
-      { text: "直接攀爬下去采摘", score: 2 },
+      { text: "直接攀爬下去采摘", score: 3 },
+      { text: "用绳索固定后小心翼翼地下去摘", score: 2 },
       { text: "找工具辅助，小心下去摘", score: 1 },
       { text: "观察地形，确认安全后再行动", score: -1 },
-      { text: "拍照留念就好，不值得冒险", score: -2 }
+      { text: "记下位置，下次带上合适的装备再来", score: -2 },
+      { text: "拍照留念就好，不值得冒险", score: -3 }
     ]
   },
   {
@@ -422,10 +496,12 @@ const questions = [
     dimension: "AC",
     question: "你的战斗风格更像？",
     options: [
-      { text: "狂战士——越战越勇，不计代价", score: 2 },
+      { text: "狂战士——越战越勇，不计代价", score: 3 },
+      { text: "游侠——灵活机动，出其不意", score: 2 },
       { text: "刺客——高风险高回报的精准打击", score: 1 },
       { text: "骑士——攻守兼备，进退有度", score: -1 },
-      { text: "堡垒——稳如泰山，绝不冒进", score: -2 }
+      { text: "谋士——运筹帷幄，决胜千里", score: -2 },
+      { text: "堡垒——稳如泰山，绝不冒进", score: -3 }
     ]
   },
   {
@@ -433,10 +509,12 @@ const questions = [
     dimension: "AC",
     question: "听说某处有宝藏但守卫强大，你会？",
     options: [
-      { text: "立刻出发，打不过就跑", score: 2 },
+      { text: "立刻出发，打不过就跑", score: 3 },
+      { text: "先侦查敌情，找到防御弱点再进攻", score: 2 },
       { text: "召集伙伴，正面挑战", score: 1 },
       { text: "制定周密计划，智取为上", score: -1 },
-      { text: "等实力更强了再来，不急这一时", score: -2 }
+      { text: "耐心等待时机，也许守卫会离开", score: -2 },
+      { text: "等实力更强了再来，不急这一时", score: -3 }
     ]
   },
   {
@@ -444,10 +522,12 @@ const questions = [
     dimension: "AC",
     question: "生活中你更喜欢？",
     options: [
-      { text: "不断尝试新事物，哪怕会失败", score: 2 },
+      { text: "不断尝试新事物，哪怕会失败", score: 3 },
+      { text: "偶尔跳出舒适区，在可控范围内尝鲜", score: 2 },
       { text: "在熟悉领域偶尔挑战新可能", score: 1 },
       { text: "在稳定基础上逐步拓展", score: -1 },
-      { text: "坚守熟悉的一切，改变带来不确定性", score: -2 }
+      { text: "除非有十足把握，否则不会轻易改变现状", score: -2 },
+      { text: "坚守熟悉的一切，改变带来不确定性", score: -3 }
     ]
   },
 
@@ -457,10 +537,12 @@ const questions = [
     dimension: "LD",
     question: "为了拯救更多人的生命，你是否愿意使用被禁止的力量？",
     options: [
-      { text: "绝不触碰禁忌，那会带来更大灾难", score: 2 },
+      { text: "绝不触碰禁忌，那会带来更大灾难", score: 3 },
+      { text: "先穷尽一切常规手段，实在不行再谨慎考虑", score: 2 },
       { text: "尽量寻找正当途径，万不得已才考虑", score: 1 },
       { text: "如果目的正义，手段可以灵活", score: -1 },
-      { text: "只要能达成目标，任何力量都可以利用", score: -2 }
+      { text: "可以借用但要严格限制范围，用完即弃", score: -2 },
+      { text: "只要能达成目标，任何力量都可以利用", score: -3 }
     ]
   },
   {
@@ -468,10 +550,12 @@ const questions = [
     dimension: "LD",
     question: "发现一个腐败官员的把柄，你会？",
     options: [
-      { text: "通过正当渠道举报，相信正义", score: 2 },
+      { text: "通过正当渠道举报，相信正义", score: 3 },
+      { text: "匿名举报，保护自己的同时也伸张正义", score: 2 },
       { text: "收集更多证据，走法律程序", score: 1 },
       { text: "私下威胁他改正，以恶制恶", score: -1 },
-      { text: "利用把柄为自己谋取利益", score: -2 }
+      { text: "记录证据但暂时按兵不动，等待合适时机", score: -2 },
+      { text: "利用把柄为自己谋取利益", score: -3 }
     ]
   },
   {
@@ -479,10 +563,12 @@ const questions = [
     dimension: "LD",
     question: "你如何看待「愚人众」的行事方式？",
     options: [
-      { text: "为了目的不择手段，必须阻止", score: 2 },
+      { text: "为了目的不择手段，必须阻止", score: 3 },
+      { text: "手段过于极端，但他们追求的目标值得思考", score: 2 },
       { text: "理念不同，但理解他们也有苦衷", score: 1 },
       { text: "结果导向，他们的效率值得肯定", score: -1 },
-      { text: "强者才有话语权，他们的做法很现实", score: -2 }
+      { text: "实力令人敬佩，但他们的野心终将自食其果", score: -2 },
+      { text: "强者才有话语权，他们的做法很现实", score: -3 }
     ]
   },
   {
@@ -490,10 +576,12 @@ const questions = [
     dimension: "LD",
     question: "一个敌人投降求饶，你会？",
     options: [
-      { text: "接受投降，给他改过自新的机会", score: 2 },
+      { text: "接受投降，给他改过自新的机会", score: 3 },
+      { text: "先确认他是否真心投降，再决定如何处置", score: 2 },
       { text: "制服他，交给公正机构审判", score: 1 },
       { text: "视他之前的罪行决定如何处理", score: -1 },
-      { text: "斩草除根，对敌人仁慈就是对自己残忍", score: -2 }
+      { text: "让他用行动证明自己的诚意，暂时留一命", score: -2 },
+      { text: "斩草除根，对敌人仁慈就是对自己残忍", score: -3 }
     ]
   },
   {
@@ -501,10 +589,12 @@ const questions = [
     dimension: "LD",
     question: "为了保护重要的人，你能做到什么程度？",
     options: [
-      { text: "在道德底线内竭尽全力", score: 2 },
+      { text: "在道德底线内竭尽全力", score: 3 },
+      { text: "愿意冒险，但会衡量代价是否值得", score: 2 },
       { text: "不惜违反一些规则", score: 1 },
       { text: "必要时可以伤害无辜", score: -1 },
-      { text: "整个世界都可以牺牲", score: -2 }
+      { text: "会做出一些妥协，但守住最后的底线", score: -2 },
+      { text: "整个世界都可以牺牲", score: -3 }
     ]
   },
   {
@@ -512,10 +602,12 @@ const questions = [
     dimension: "LD",
     question: "你更认同哪种信念？",
     options: [
-      { text: "光明终将战胜黑暗，正义必胜", score: 2 },
+      { text: "光明终将战胜黑暗，正义必胜", score: 3 },
+      { text: "善恶有时取决于观察的角度和立场", score: 2 },
       { text: "世界有灰色地带，但向善是对的", score: 1 },
       { text: "没有绝对善恶，只有立场不同", score: -1 },
-      { text: "弱肉强食，强者定义正义", score: -2 }
+      { text: "世事无常，能坚守本心已是难得", score: -2 },
+      { text: "弱肉强食，强者定义正义", score: -3 }
     ]
   },
   {
@@ -523,10 +615,12 @@ const questions = [
     dimension: "LD",
     question: "获得一件被诅咒但强大的武器，你会？",
     options: [
-      { text: "封印或销毁它，不让他人受害", score: 2 },
+      { text: "封印或销毁它，不让他人受害", score: 3 },
+      { text: "暂时保管，寻找解除诅咒的方法", score: 2 },
       { text: "交给教会或权威机构处理", score: 1 },
       { text: "小心使用，用它的力量做好事", score: -1 },
-      { text: "力量就是力量，为我所用即可", score: -2 }
+      { text: "研究它的原理，也许能化害为利", score: -2 },
+      { text: "力量就是力量，为我所用即可", score: -3 }
     ]
   },
   {
@@ -534,10 +628,12 @@ const questions = [
     dimension: "LD",
     question: "面对「为了多数人的利益牺牲少数人」的命题，你认为？",
     options: [
-      { text: "每个生命都平等，不能简单量化", score: 2 },
+      { text: "每个生命都平等，不能简单量化", score: 3 },
+      { text: "这取决于具体情况，没有标准答案", score: 2 },
       { text: "应尽力避免，寻找两全方案", score: 1 },
       { text: "必要时是无奈但合理的选择", score: -1 },
-      { text: "弱者本就应为强者让路", score: -2 }
+      { text: "应该尽可能保护每一个人，哪怕是少数", score: -2 },
+      { text: "弱者本就应为强者让路", score: -3 }
     ]
   },
 
@@ -547,10 +643,12 @@ const questions = [
     dimension: "RC",
     question: "你如何看待七国的法律体系？",
     options: [
-      { text: "秩序是社会运转的基础，必须维护", score: 2 },
+      { text: "秩序是社会运转的基础，必须维护", score: 3 },
+      { text: "法律需要完善，但框架本身是好的", score: 2 },
       { text: "规则是必要的，但可以与时俱进", score: 1 },
       { text: "太多规则束缚了人的自由", score: -1 },
-      { text: "规则只是强者控制弱者的工具", score: -2 }
+      { text: "有些法律过于死板，应该因地制宜", score: -2 },
+      { text: "规则只是强者控制弱者的工具", score: -3 }
     ]
   },
   {
@@ -558,10 +656,12 @@ const questions = [
     dimension: "RC",
     question: "在团队中，你更希望？",
     options: [
-      { text: "有明确的等级和分工，各司其职", score: 2 },
+      { text: "有明确的等级和分工，各司其职", score: 3 },
+      { text: "有核心领导者，但团队成员可以自由发言", score: 2 },
       { text: "有基本规则，大家按约定行事", score: 1 },
       { text: "扁平化管理，谁行谁上", score: -1 },
-      { text: "没有固定结构，完全自由协作", score: -2 }
+      { text: "临时搭档模式，谁擅长什么就做什么", score: -2 },
+      { text: "没有固定结构，完全自由协作", score: -3 }
     ]
   },
   {
@@ -569,10 +669,12 @@ const questions = [
     dimension: "RC",
     question: "发现一条不合理的规则，你会？",
     options: [
-      { text: "通过正规渠道提议修改", score: 2 },
+      { text: "通过正规渠道提议修改", score: 3 },
+      { text: "联合有相同想法的人一起推动改变", score: 2 },
       { text: "遵守的同时寻找变通方法", score: 1 },
       { text: "在不影响他人的情况下打破它", score: -1 },
-      { text: "公开违抗，让规则显得荒谬", score: -2 }
+      { text: "在不被发现的情况下悄悄绕过它", score: -2 },
+      { text: "公开违抗，让规则显得荒谬", score: -3 }
     ]
   },
   {
@@ -580,10 +682,12 @@ const questions = [
     dimension: "RC",
     question: "你理想中的社会是什么样的？",
     options: [
-      { text: "人人守序、和谐稳定的社会", score: 2 },
+      { text: "人人守序、和谐稳定的社会", score: 3 },
+      { text: "有基本法律保障，但给个人留足自由空间", score: 2 },
       { text: "有秩序但也包容差异的社会", score: 1 },
       { text: "自由奔放、充满活力的社会", score: -1 },
-      { text: "不断变革、打破一切旧框架的社会", score: -2 }
+      { text: "人们凭良心行事，不需要太多外在约束", score: -2 },
+      { text: "不断变革、打破一切旧框架的社会", score: -3 }
     ]
   },
   {
@@ -591,10 +695,12 @@ const questions = [
     dimension: "RC",
     question: "执行任务时，上级下达了明显错误的命令，你会？",
     options: [
-      { text: "执行命令，同时向上级反馈问题", score: 2 },
+      { text: "执行命令，同时向上级反馈问题", score: 3 },
+      { text: "执行但保留意见，事后寻求制度层面的改进", score: 2 },
       { text: "请示确认，得到答复后再行动", score: 1 },
       { text: "根据实际情况灵活处理", score: -1 },
-      { text: "拒绝执行，按自己认为对的做", score: -2 }
+      { text: "先按自己的判断行动，事后再解释原因", score: -2 },
+      { text: "拒绝执行，按自己认为对的做", score: -3 }
     ]
   },
   {
@@ -602,10 +708,12 @@ const questions = [
     dimension: "RC",
     question: "你更喜欢哪种音乐风格？",
     options: [
-      { text: "古典乐——严谨和谐的结构之美", score: 2 },
+      { text: "古典乐——严谨和谐的结构之美", score: 3 },
+      { text: "摇滚——在激情中寻找释放", score: 2 },
       { text: "民谣——有传统根基的自由表达", score: 1 },
       { text: "爵士乐——即兴发挥的灵动", score: -1 },
-      { text: "实验音乐——打破一切常规", score: -2 }
+      { text: "电子乐——用科技创造全新的声音宇宙", score: -2 },
+      { text: "实验音乐——打破一切常规", score: -3 }
     ]
   },
   {
@@ -613,10 +721,12 @@ const questions = [
     dimension: "RC",
     question: "如何看待「风带来故事的种子，时间使之发芽」这句话？",
     options: [
-      { text: "万物有其规律和时序", score: 2 },
+      { text: "万物有其规律和时序", score: 3 },
+      { text: "每颗种子都有它的归宿，耐心等待就好", score: 2 },
       { text: "顺其自然，但也要适时耕耘", score: 1 },
       { text: "风是自由的，不该被定义", score: -1 },
-      { text: "种子可以随风去任何地方，打破界限", score: -2 }
+      { text: "何不让风带我去未知的地方看看", score: -2 },
+      { text: "种子可以随风去任何地方，打破界限", score: -3 }
     ]
   },
   {
@@ -624,10 +734,12 @@ const questions = [
     dimension: "RC",
     question: "你的日常作息是？",
     options: [
-      { text: "严格按时，雷打不动", score: 2 },
+      { text: "严格按时，雷打不动", score: 3 },
+      { text: "大体规律，但允许自己偶尔放纵一下", score: 2 },
       { text: "大致规律，偶尔调整", score: 1 },
       { text: "随心所欲，看心情而定", score: -1 },
-      { text: "昼夜颠倒，没有固定模式", score: -2 }
+      { text: "灵感来了就通宵，困了就睡到自然醒", score: -2 },
+      { text: "昼夜颠倒，没有固定模式", score: -3 }
     ]
   },
 
@@ -637,10 +749,12 @@ const questions = [
     dimension: "HM",
     question: "遇到开心的事情，你会？",
     options: [
-      { text: "立刻欢呼雀跃，让全世界知道", score: 2 },
+      { text: "立刻欢呼雀跃，让全世界知道", score: 3 },
+      { text: "手舞足蹈地和大家分享，忍不住笑出声", score: 2 },
       { text: "笑容满面，和身边的人分享喜悦", score: 1 },
       { text: "内心欢喜，淡淡地微笑", score: -1 },
-      { text: "几乎不表露，但会默默记住这份美好", score: -2 }
+      { text: "心里很感动，默默在心里画下这一刻", score: -2 },
+      { text: "几乎不表露，但会默默记住这份美好", score: -3 }
     ]
   },
   {
@@ -648,10 +762,12 @@ const questions = [
     dimension: "HM",
     question: "朋友遭遇挫折哭泣时，你会？",
     options: [
-      { text: "紧紧拥抱他，陪他一起哭", score: 2 },
+      { text: "紧紧拥抱他，陪他一起哭", score: 3 },
+      { text: "握住他的手，轻声说「我在这里」", score: 2 },
       { text: "坐在他身边，温柔地安慰", score: 1 },
       { text: "递上纸巾，安静地陪伴", score: -1 },
-      { text: "分析情况，给出解决问题的建议", score: -2 }
+      { text: "倒一杯热水递过去，用沉默表达陪伴", score: -2 },
+      { text: "分析情况，给出解决问题的建议", score: -3 }
     ]
   },
   {
@@ -659,10 +775,12 @@ const questions = [
     dimension: "HM",
     question: "你的愤怒通常是？",
     options: [
-      { text: "来得快去得也快，当场爆发", score: 2 },
+      { text: "来得快去得也快，当场爆发", score: 3 },
+      { text: "会皱眉或提高音量，但很快恢复平静", score: 2 },
       { text: "会表现出来，让对方知道你的不满", score: 1 },
       { text: "闷在心里，用冷淡表示不满", score: -1 },
-      { text: "几乎不生气，即使生气也看不出来", score: -2 }
+      { text: "表面毫无波澜，但会在独处时慢慢消化", score: -2 },
+      { text: "几乎不生气，即使生气也看不出来", score: -3 }
     ]
   },
   {
@@ -670,10 +788,12 @@ const questions = [
     dimension: "HM",
     question: "在庆祝胜利的宴会上，你会？",
     options: [
-      { text: "最嗨的那个，带头唱歌跳舞", score: 2 },
+      { text: "最嗨的那个，带头唱歌跳舞", score: 3 },
+      { text: "举杯向每个人致意，融入欢乐的氛围中", score: 2 },
       { text: "积极参与，气氛组主力", score: 1 },
       { text: "坐在一旁微笑看着大家", score: -1 },
-      { text: "提前离开，不喜欢喧闹场合", score: -2 }
+      { text: "找个安静角落，远远地看着朋友们开心", score: -2 },
+      { text: "提前离开，不喜欢喧闹场合", score: -3 }
     ]
   },
   {
@@ -681,10 +801,12 @@ const questions = [
     dimension: "HM",
     question: "向别人表达感谢时，你会？",
     options: [
-      { text: "热情地表达，可能还送礼物", score: 2 },
+      { text: "热情地表达，可能还送礼物", score: 3 },
+      { text: "写一封感谢信或准备一份心意小礼物", score: 2 },
       { text: "真诚地说谢谢，眼神充满感激", score: 1 },
       { text: "简单一句谢谢，但记在心里", score: -1 },
-      { text: "用行动回报，不善言辞", score: -2 }
+      { text: "把这份恩情铭记在心，日后找机会回报", score: -2 },
+      { text: "用行动回报，不善言辞", score: -3 }
     ]
   },
   {
@@ -692,10 +814,12 @@ const questions = [
     dimension: "HM",
     question: "面对突如其来的危机，你的第一反应是？",
     options: [
-      { text: "情绪激昂，大喊着冲上去", score: 2 },
+      { text: "情绪激昂，大喊着冲上去", score: 3 },
+      { text: "短暂愣神后迅速调整状态投入行动", score: 2 },
       { text: "心跳加速，但迅速行动起来", score: 1 },
       { text: "深吸一口气，冷静分析局势", score: -1 },
-      { text: "面不改色，仿佛什么都没发生", score: -2 }
+      { text: "有条不紊地评估形势，制定应对方案", score: -2 },
+      { text: "面不改色，仿佛什么都没发生", score: -3 }
     ]
   },
   {
@@ -703,10 +827,12 @@ const questions = [
     dimension: "HM",
     question: "你更喜欢和哪种人相处？",
     options: [
-      { text: "热情似火、情绪丰富的人", score: 2 },
+      { text: "热情似火、情绪丰富的人", score: 3 },
+      { text: "温暖体贴、善解人意的人", score: 2 },
       { text: "开朗健谈、容易亲近的人", score: 1 },
       { text: "沉稳内敛、深思熟虑的人", score: -1 },
-      { text: "冷静理性、波澜不惊的人", score: -2 }
+      { text: "话不多但关键时刻靠得住的人", score: -2 },
+      { text: "冷静理性、波澜不惊的人", score: -3 }
     ]
   },
   {
@@ -714,10 +840,12 @@ const questions = [
     dimension: "HM",
     question: "描述自己的情感世界，你会说？",
     options: [
-      { text: "像火山一样热烈奔放", score: 2 },
+      { text: "像火山一样热烈奔放", score: 3 },
+      { text: "像阳光一样温暖明亮", score: 2 },
       { text: "像河流一样流动自然", score: 1 },
       { text: "像深湖一样平静深沉", score: -1 },
-      { text: "像冰川一样冷静克制", score: -2 }
+      { text: "像夜空一样深邃而安静", score: -2 },
+      { text: "像冰川一样冷静克制", score: -3 }
     ]
   }
 ];

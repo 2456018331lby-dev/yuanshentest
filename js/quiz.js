@@ -99,6 +99,20 @@ class PersonalityQuiz {
         this.resultTime = document.getElementById('result-time');
         this.confettiContainer = document.getElementById('confetti-container');
         this.themeToggle = document.getElementById('theme-toggle');
+        
+        // Music player
+        this.musicToggle = document.getElementById('music-toggle');
+        this.musicControls = document.getElementById('music-controls');
+        this.musicVolume = document.getElementById('music-volume');
+        this.bgmAudio = document.getElementById('bgm-audio');
+        this.musicPlaying = false;
+        
+        // Swipe tracking
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchEndX = 0;
+        this.touchEndY = 0;
+        this.isSwiping = false;
     }
 
     bindEvents() {
@@ -125,6 +139,56 @@ class PersonalityQuiz {
 
         // Theme toggle
         this.themeToggle.addEventListener('click', () => this.toggleTheme());
+        
+        // Music toggle
+        this.musicToggle.addEventListener('click', () => this.toggleMusic());
+        
+        // Music volume
+        if (this.musicVolume) {
+            this.musicVolume.addEventListener('input', (e) => {
+                this.bgmAudio.volume = e.target.value / 100;
+                localStorage.setItem('genshinQuizVolume', e.target.value);
+            });
+        }
+        
+        // Music drag-and-drop support
+        document.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            this.musicToggle.parentElement.classList.add('music-drop-active');
+        });
+        document.addEventListener('dragleave', () => {
+            this.musicToggle.parentElement.classList.remove('music-drop-active');
+        });
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            this.musicToggle.parentElement.classList.remove('music-drop-active');
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('audio/')) {
+                this.loadMusicFile(file);
+            }
+        });
+        
+        // Swipe handling on quiz content wrapper
+        const quizWrapper = document.getElementById('quiz-content-wrapper');
+        if (quizWrapper) {
+            quizWrapper.addEventListener('touchstart', (e) => {
+                this.touchStartX = e.changedTouches[0].screenX;
+                this.touchStartY = e.changedTouches[0].screenY;
+                this.isSwiping = false;
+            }, { passive: true });
+            
+            quizWrapper.addEventListener('touchmove', (e) => {
+                const dx = Math.abs(e.changedTouches[0].screenX - this.touchStartX);
+                const dy = Math.abs(e.changedTouches[0].screenY - this.touchStartY);
+                if (dx > dy && dx > 20) this.isSwiping = true;
+            }, { passive: true });
+            
+            quizWrapper.addEventListener('touchend', (e) => {
+                this.touchEndX = e.changedTouches[0].screenX;
+                this.touchEndY = e.changedTouches[0].screenY;
+                this.handleSwipe();
+            }, { passive: true });
+        }
 
         // Timer pause on tab hidden
         document.addEventListener('visibilitychange', () => {
@@ -159,7 +223,7 @@ class PersonalityQuiz {
             if (this.isAnimating) return;
 
             switch (e.key) {
-                case '1': case '2': case '3': case '4': {
+                case '1': case '2': case '3': case '4': case '5': case '6': {
                     const idx = parseInt(e.key) - 1;
                     const options = this.optionsContainer.querySelectorAll('.option');
                     if (options[idx] && !options[idx].classList.contains('disabled')) {
@@ -251,6 +315,139 @@ class PersonalityQuiz {
         } catch (e) {
             // Silently fail
         }
+    }
+
+    // ---- Music Player ----
+
+    toggleMusic() {
+        if (this.musicPlaying) {
+            this.pauseMusic();
+        } else {
+            this.playMusic();
+        }
+    }
+
+    playMusic() {
+        // Try loading from music/ folder
+        if (!this.bgmAudio.src || this.bgmAudio.src === window.location.href) {
+            const sources = ['music/main.mp3', 'music/bgm.mp3', 'music/theme.mp3'];
+            this.tryLoadMusic(sources, 0);
+            return;
+        }
+        this.bgmAudio.volume = (this.musicVolume?.value || 30) / 100;
+        this.bgmAudio.play().then(() => {
+            this.musicPlaying = true;
+            this.musicToggle.classList.add('playing');
+            this.musicToggle.querySelector('.music-icon-on').style.display = '';
+            this.musicToggle.querySelector('.music-icon-off').style.display = 'none';
+            this.musicControls.style.display = 'flex';
+            localStorage.setItem('genshinQuizMusic', 'on');
+        }).catch(() => {});
+    }
+
+    tryLoadMusic(sources, index) {
+        if (index >= sources.length) {
+            this.showToast(t('musicNotFound') || '请拖拽音频文件到🎵按钮上');
+            return;
+        }
+        this.bgmAudio.src = sources[index];
+        this.bgmAudio.load();
+        this.bgmAudio.oncanplaythrough = () => {
+            this.bgmAudio.oncanplaythrough = null;
+            this.playMusic();
+        };
+        this.bgmAudio.onerror = () => {
+            this.bgmAudio.onerror = null;
+            this.tryLoadMusic(sources, index + 1);
+        };
+    }
+
+    initMusicFromStorage() {
+        const savedMusic = localStorage.getItem('genshinQuizMusic');
+        const savedVolume = localStorage.getItem('genshinQuizVolume');
+        if (savedVolume && this.musicVolume) {
+            this.musicVolume.value = savedVolume;
+            if (this.bgmAudio) this.bgmAudio.volume = savedVolume / 100;
+        }
+        if (savedMusic === 'on') {
+            this.playMusic();
+        }
+    }
+
+    pauseMusic() {
+        this.bgmAudio.pause();
+        this.musicPlaying = false;
+        this.musicToggle.classList.remove('playing');
+        this.musicToggle.querySelector('.music-icon-on').style.display = 'none';
+        this.musicToggle.querySelector('.music-icon-off').style.display = '';
+        this.musicControls.style.display = 'none';
+        localStorage.setItem('genshinQuizMusic', 'off');
+    }
+
+    loadMusicFile(file) {
+        const url = URL.createObjectURL(file);
+        this.bgmAudio.src = url;
+        this.bgmAudio.load();
+        this.bgmAudio.oncanplaythrough = () => {
+            this.bgmAudio.oncanplaythrough = null;
+            this.playMusic();
+        };
+    }
+
+    // ---- Swipe Navigation ----
+
+    handleSwipe() {
+        if (this.isAnimating) return;
+        const dx = this.touchEndX - this.touchStartX;
+        const dy = this.touchEndY - this.touchStartY;
+        const threshold = 60;
+        
+        // Only handle horizontal swipes that are clearly horizontal
+        if (Math.abs(dx) < threshold || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+        
+        const quizContent = document.querySelector('#quiz-content-wrapper .quiz-content');
+        if (!quizContent) return;
+        
+        if (dx < 0) {
+            // Swipe left = next question (only if answered)
+            if (this.answers[this.currentQuestion]) {
+                this.swipeToNext(quizContent);
+            }
+        } else {
+            // Swipe right = previous question
+            this.goToPreviousQuestion();
+        }
+    }
+
+    swipeToNext(quizContent) {
+        if (this.isAnimating) return;
+        this.isAnimating = true;
+        
+        quizContent.classList.add('slide-out-left');
+        
+        setTimeout(() => {
+            quizContent.classList.remove('slide-out-left');
+            this.currentQuestion++;
+            if (this.currentQuestion < questions.length) {
+                this.showQuestion();
+                quizContent.classList.add('slide-in-right');
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        quizContent.classList.remove('slide-in-right');
+                        quizContent.classList.add('slide-enter');
+                        setTimeout(() => {
+                            quizContent.classList.remove('slide-enter');
+                            this.isAnimating = false;
+                        }, 400);
+                    });
+                });
+            } else {
+                this.clearSavedProgress();
+                this.disableExitWarning();
+                this.showResult();
+                this.isAnimating = false;
+            }
+        }, 350);
     }
 
     // ---- Progress Save/Restore ----
@@ -436,6 +633,7 @@ class PersonalityQuiz {
         this.enableExitWarning();
         this.resetTimer();
         this.startTimer();
+        this.initMusicFromStorage();
         this.showSkeleton();
         this.landingPage.classList.remove('active');
 
@@ -499,8 +697,9 @@ class PersonalityQuiz {
         // 更新进度点
         this.updateProgressDots();
 
-        // 更新选项
+        // 更新选项 - use grid layout for 6 options
         this.optionsContainer.innerHTML = '';
+        this.optionsContainer.className = question.options.length > 4 ? 'options options-grid' : 'options';
         this.focusedOption = -1;
         question.options.forEach((option, index) => {
             const button = document.createElement('button');
@@ -512,6 +711,16 @@ class PersonalityQuiz {
             button.addEventListener('click', () => this.selectOption(option, button, index));
             this.optionsContainer.appendChild(button);
         });
+        
+        // Add swipe hint on mobile for first question
+        if (this.currentQuestion === 0 && window.innerWidth <= 768) {
+            const existing = document.querySelector('.swipe-hint');
+            if (existing) existing.remove();
+            const hint = document.createElement('div');
+            hint.className = 'swipe-hint';
+            hint.textContent = t('swipeHint') || '← 左滑下一题';
+            this.optionsContainer.after(hint);
+        }
 
         // 如果是返回到这题，高亮之前选过的选项
         const existingAnswer = this.answers[this.currentQuestion];
@@ -613,32 +822,62 @@ class PersonalityQuiz {
     }
 
     transitionToNextQuestion() {
-        const elements = [this.questionNumber, this.questionText, ...this.optionsContainer.children];
-        elements.forEach((el, i) => {
-            el.style.transition = `all 0.3s ease ${i * 0.03}s`;
-            el.style.opacity = '0';
-            el.style.transform = 'translateX(-20px)';
-        });
-
-        setTimeout(() => {
-            this.showQuestion();
-            this.isAnimating = false;
-        }, 350);
+        const quizContent = document.querySelector('#quiz-content-wrapper .quiz-content');
+        if (quizContent) {
+            quizContent.classList.add('slide-out-left');
+            setTimeout(() => {
+                quizContent.classList.remove('slide-out-left');
+                this.showQuestion();
+                quizContent.classList.add('slide-in-right');
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        quizContent.classList.remove('slide-in-right');
+                        this.isAnimating = false;
+                    });
+                });
+            }, 300);
+        } else {
+            const elements = [this.questionNumber, this.questionText, ...this.optionsContainer.children];
+            elements.forEach((el, i) => {
+                el.style.transition = `all 0.3s ease ${i * 0.03}s`;
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(-20px)';
+            });
+            setTimeout(() => {
+                this.showQuestion();
+                this.isAnimating = false;
+            }, 350);
+        }
     }
 
     transitionToPreviousQuestion() {
         this.isAnimating = true;
-        const elements = [this.questionNumber, this.questionText, ...this.optionsContainer.children];
-        elements.forEach((el, i) => {
-            el.style.transition = `all 0.3s ease ${i * 0.03}s`;
-            el.style.opacity = '0';
-            el.style.transform = 'translateX(20px)';
-        });
-
-        setTimeout(() => {
-            this.showQuestion();
-            this.isAnimating = false;
-        }, 350);
+        const quizContent = document.querySelector('#quiz-content-wrapper .quiz-content');
+        if (quizContent) {
+            quizContent.classList.add('slide-in-right');
+            setTimeout(() => {
+                quizContent.classList.remove('slide-in-right');
+                this.showQuestion();
+                quizContent.classList.add('slide-out-left');
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        quizContent.classList.remove('slide-out-left');
+                        this.isAnimating = false;
+                    });
+                });
+            }, 300);
+        } else {
+            const elements = [this.questionNumber, this.questionText, ...this.optionsContainer.children];
+            elements.forEach((el, i) => {
+                el.style.transition = `all 0.3s ease ${i * 0.03}s`;
+                el.style.opacity = '0';
+                el.style.transform = 'translateX(20px)';
+            });
+            setTimeout(() => {
+                this.showQuestion();
+                this.isAnimating = false;
+            }, 350);
+        }
     }
 
     // 计算8维雷达得分（0-100）

@@ -95,7 +95,7 @@
                     <span class="dot"></span>
                     <span>8 大维度</span>
                     <span class="dot"></span>
-                    <span>32 位角色</span>
+                    <span>54 位角色</span>
                     <span class="dot"></span>
                     <span>约需 10-15 分钟</span>
                 </div>
@@ -113,7 +113,7 @@
                         <span class="sound-icon-on">🔊</span>
                         <span class="sound-icon-off" style="display:none;">🔇</span>
                     </button>
-                    <div class="quiz-nav-hint">按数字键 1-4 选择 · ← 返回 · → 下一题</div>
+                    <div class="quiz-nav-hint">按数字键 1-6 选择 · ← 返回 · → 下一题</div>
                     <div class="quiz-timer" id="quiz-timer">⏱ 00:00</div>
                 </div>
                 <div class="progress-bar">
@@ -144,6 +144,8 @@
                 <div class="skeleton-line skeleton-text"></div>
                 <div class="skeleton-line skeleton-text short"></div>
                 <div class="skeleton-options">
+                    <div class="skeleton-option"></div>
+                    <div class="skeleton-option"></div>
                     <div class="skeleton-option"></div>
                     <div class="skeleton-option"></div>
                     <div class="skeleton-option"></div>
@@ -291,6 +293,19 @@
     <!-- Confetti container -->
     <div id="confetti-container" class="confetti-container"></div>
 
+
+    <!-- 音乐播放器 -->
+    <div id="music-player" class="music-player">
+        <button id="music-toggle" class="music-toggle" title="背景音乐 / BGM">
+            <span class="music-icon-on">🎵</span>
+            <span class="music-icon-off" style="display:none;">🔇</span>
+        </button>
+        <div class="music-controls" id="music-controls" style="display:none;">
+            <input type="range" id="music-volume" class="music-volume" min="0" max="100" value="30" title="音量">
+            <span class="music-label">BGM</span>
+        </div>
+    </div>
+    <audio id="bgm-audio" loop preload="auto"></audio>
     <!-- Toast 提示 -->
     <div id="toast" class="toast"></div>
 
